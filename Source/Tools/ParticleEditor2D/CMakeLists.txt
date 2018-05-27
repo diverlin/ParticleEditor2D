@@ -23,33 +23,52 @@
 # Define target name
 set (TARGET_NAME ParticleEditor2D)
 
-find_package(Qt4 REQUIRED)
-include(${QT_USE_FILE})
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+find_package(Qt5Core REQUIRED)
+find_package(Qt5Gui REQUIRED)
+find_package(Qt5Widgets REQUIRED)
+
 add_definitions(${QT_DEFINITIONS})
 
 # Find Urho3D library
-# find_package (Urho3D REQUIRED)
-# include_directories (${URHO3D_INCLUDE_DIRS})
+find_package (Urho3D REQUIRED)
+include_directories (${URHO3D_INCLUDE_DIRS})
 
-# INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 
 # Define source files
 define_source_files ()
 
 # Moccing h files
-qt4_wrap_cpp( MOC_FILES ${H_FILES} )
+qt5_wrap_cpp( MOC_FILES ${H_FILES} )
 
 # Compile ui files
 file (GLOB UI_FILES *.ui)
-qt4_wrap_ui( UI_HEADERS ${UI_FILES} )
+qt5_wrap_ui( UI_HEADERS ${UI_FILES} )
 
 # Rccing qrc files
 file (GLOB QRC_FILES *.qrc)
-qt4_add_resources( RCC_FILES ${QRC_FILES} )
+qt5_add_resources( RCC_FILES ${QRC_FILES} )
 
 set (SOURCE_FILES ${SOURCE_FILES} ${MOC_FILES} ${UI_HEADERS} ${RCC_FILES})
 
 # Setup target with resource copying
-setup_main_executable ()
+setup_executable (TOOL)
 
-target_link_libraries(${TARGET_NAME} ${QT_LIBRARIES})
+target_link_libraries(${TARGET_NAME} Qt5::Core Qt5::Gui Qt5::Widgets)
+
+
+macro(make_rc_symlink)
+    set(resource_root "${CMAKE_CURRENT_SOURCE_DIR}/../../../Bin")
+    set(dist_root "${CMAKE_CURRENT_BINARY_DIR}/../bin/tool")
+
+    add_custom_target(link_target ALL
+                      COMMAND ${CMAKE_COMMAND} -E create_symlink ${resource_root}/CoreData ${dist_root}/CoreData
+                      COMMAND ${CMAKE_COMMAND} -E create_symlink ${resource_root}/Data ${dist_root}/Data
+                      )
+endmacro(make_rc_symlink)
+
+if (IS_STANDALONE_TOOL)
+    make_rc_symlink()
+endif()
+

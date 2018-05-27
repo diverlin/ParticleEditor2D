@@ -20,7 +20,7 @@
 // THE SOFTWARE.
 //
 
-#include "Application.h"
+#include <Urho3D/Engine/Application.h>
 #include "ParticleEditor.h"
 #include <QFile>
 
@@ -37,5 +37,4 @@ int Main()
 
     return editor.Run();
 }
-
-DEFINE_MAIN(Main());
+URHO3D_DEFINE_MAIN(Main());
