@@ -69,7 +69,7 @@ macro(make_rc_symlink)
                       )
 endmacro(make_rc_symlink)
 
-if (NOT URHO3D_TOOLS)
+if (IS_STANDALONE_TOOL)
     make_rc_symlink()
 endif()
 
