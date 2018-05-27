@@ -20,15 +20,30 @@
 # THE SOFTWARE.
 #
 
+cmake_minimum_required(VERSION 3.2)
+
 # Set project name
 project (Urho3D-Tools)
+
+set(CMAKE_CXX_FLAGS "-std=c++11 -fPIC")
+
+#set(CMAKE_PREFIX_PATH "/workspace/Qt/5.11.0/gcc_64")
+#set(URHO3D_HOME "/media/yeti/ext_workspace/dist_gcc54/Urho3D") # setit as env
+
+if (NOT URHO3D_TOOLS)
+    list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake/Modules")
+endif()
+
+include(${CMAKE_MODULE_PATH}/UrhoCommon.cmake)
 
 # Find Urho3D library
 find_package (Urho3D REQUIRED)
 include_directories (${URHO3D_INCLUDE_DIRS})
 
 # Urho3DPlayer application
-add_subdirectory (Urho3DPlayer)
+if (URHO3D_TOOLS)
+    add_subdirectory (Urho3DPlayer)
+endif()
 
 # ParticleEditor application
 add_subdirectory (ParticleEditor2D)
@@ -44,3 +59,5 @@ if (NOT IOS AND NOT ANDROID AND URHO3D_TOOLS)
         add_subdirectory (ScriptCompiler)
     endif ()
 endif ()
+
+
