@@ -27,7 +27,6 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Gui REQUIRED)
 find_package(Qt5Widgets REQUIRED)
-find_package(OpenGL REQUIRED)
 
 add_definitions(${QT_DEFINITIONS})
 
@@ -56,7 +55,7 @@ set (SOURCE_FILES ${SOURCE_FILES} ${MOC_FILES} ${UI_HEADERS} ${RCC_FILES})
 # Setup target with resource copying
 setup_executable (TOOL)
 
-target_link_libraries(${TARGET_NAME} Qt5::Core Qt5::Gui Qt5::Widgets ${OPENGL_LIBRARIES})
+target_link_libraries(${TARGET_NAME} Qt5::Core Qt5::Gui Qt5::Widgets)
 
 
 macro(make_rc_symlink)
