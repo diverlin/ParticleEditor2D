@@ -27,14 +27,12 @@ project (Urho3D-Tools)
 
 set(CMAKE_CXX_FLAGS "-std=c++11 -fPIC")
 
-#set(CMAKE_PREFIX_PATH "/workspace/Qt/5.11.0/gcc_64")
-#set(URHO3D_HOME "/media/yeti/ext_workspace/dist_gcc54/Urho3D") # setit as env
-
-if (NOT URHO3D_TOOLS)
-    list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake/Modules")
-endif()
-
-include(${CMAKE_MODULE_PATH}/UrhoCommon.cmake)
+if (NOT URHO3D_TOOLS AND DEFINED ENV{URHO3D_HOME})
+    file (TO_CMAKE_PATH "$ENV{URHO3D_HOME}" ENV_URHO3D_HOME)
+    set(URHO3D_MODULES_ROOT "${ENV_URHO3D_HOME}/share/Urho3D/CMake/Modules")
+    list(APPEND CMAKE_MODULE_PATH ${URHO3D_MODULES_ROOT})
+    include(${URHO3D_MODULES_ROOT}/UrhoCommon.cmake)
+endif ()
 
 # Find Urho3D library
 find_package (Urho3D REQUIRED)
