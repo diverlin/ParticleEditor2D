@@ -41,13 +41,6 @@
 #include <QResizeEvent>
 
 
-CentralWidget::CentralWidget(QWidget* parent): QWidget(parent, Qt::Window) {}
-CentralWidget::~CentralWidget() {}
-
-void CentralWidget::resizeEvent(QResizeEvent* event) {
-    qInfo()<<"from old="<<event->oldSize()<<"to new="<<event->size();
-}
-
 namespace Urho3D
 {
 
@@ -59,7 +52,7 @@ MainWindow::MainWindow(Context* context) :
 {
     setWindowIcon(QIcon(":/Images/Icon.png"));
 
-    CentralWidget* widget = new CentralWidget();
+    QWidget* widget = new QWidget();
     setCentralWidget(widget);
     
     widget->setFixedSize(800, 800); // workaround, the SDL2_GetWindowSize(window, width, height) doesn't get actual window size when QWidget is actually resized

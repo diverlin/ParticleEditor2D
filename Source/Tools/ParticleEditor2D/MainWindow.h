@@ -32,17 +32,6 @@ class QAction;
 class QActionGroup;
 class QMenu;
 
-class CentralWidget : public QWidget {
-    Q_OBJECT
-public:
-    CentralWidget(QWidget* parent = nullptr);
-    ~CentralWidget();
-
-protected:
-    void resizeEvent(QResizeEvent* event) override final;
-};
-
-
 namespace Urho3D
 {
 
