@@ -20,12 +20,13 @@
 // THE SOFTWARE.
 //
 
-#include<Urho3D/Graphics/Camera.h>
-#include <Urho3D/Core/Context.h>
 #include "EmitterAttributeEditor.h"
 #include "MainWindow.h"
 #include "ParticleAttributeEditor.h"
 #include "ParticleEditor.h"
+
+#include <Urho3D/Graphics/Camera.h>
+#include <Urho3D/Core/Context.h>
 #include <Urho3D/Graphics/Renderer.h>
 #include <Urho3D/Graphics/Zone.h>
 
@@ -36,6 +37,9 @@
 #include <QMenu>
 #include <QMenuBar>
 #include <QToolBar>
+#include <QDebug>
+#include <QResizeEvent>
+
 
 namespace Urho3D
 {
@@ -47,14 +51,15 @@ MainWindow::MainWindow(Context* context) :
     particleAttributeEditor_(0)
 {
     setWindowIcon(QIcon(":/Images/Icon.png"));
-    showMaximized();
 
     QWidget* widget = new QWidget();
     setCentralWidget(widget);
     
-    widget->setMinimumSize(128, 128);
+    widget->setFixedSize(800, 800); // workaround, the SDL2_GetWindowSize(window, width, height) doesn't get actual window size when QWidget is actually resized
     widget->setUpdatesEnabled(false);
     widget->setFocusPolicy(Qt::StrongFocus);
+
+    showMaximized();
 }
 
 void MainWindow::CreateWidgets()
