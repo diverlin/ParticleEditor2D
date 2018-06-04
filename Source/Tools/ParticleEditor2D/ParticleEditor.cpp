@@ -25,6 +25,7 @@
 
 #include <Urho3D/Graphics/Camera.h>
 #include <Urho3D/Engine/Console.h>
+#include <Urho3D/Engine/EngineDefs.h>
 #include <Urho3D/Core/Context.h>
 #include <Urho3D/Core/CoreEvents.h>
 #include <Urho3D/Engine/DebugHud.h>
@@ -46,6 +47,7 @@
 
 #include <QFile>
 #include <QTimer>
+#include <QDebug>
 
 namespace Urho3D
 {
@@ -71,9 +73,13 @@ ParticleEditor::~ParticleEditor()
 int ParticleEditor::Run()
 {
     VariantMap engineParameters;
-    engineParameters["FrameLimiter"] = false;
-    engineParameters["LogName"] = "ParticleEditor2D.log";
-    engineParameters["ExternalWindow"] = (void*)(mainWindow_->centralWidget()->winId());
+    engineParameters[EP_FRAME_LIMITER] = false;
+    engineParameters[EP_RESOURCE_PATHS] = "CoreData;Data";
+    engineParameters[EP_LOG_NAME] = "ParticleEditor2D.log";
+    engineParameters[EP_EXTERNAL_WINDOW] = (void*)(mainWindow_->centralWidget()->winId());
+    engineParameters[EP_WINDOW_RESIZABLE] = true;
+    engineParameters[EP_FULL_SCREEN] = false;
+
     if (!engine_->Initialize(engineParameters))
         return -1;
 
@@ -82,7 +88,7 @@ int ParticleEditor::Run()
     CreateDebugHud();
 
     mainWindow_->CreateWidgets();
-    
+
     New();
 
     QTimer timer;
