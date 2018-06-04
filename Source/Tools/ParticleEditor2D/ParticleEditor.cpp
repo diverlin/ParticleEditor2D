@@ -101,32 +101,53 @@ int ParticleEditor::Run()
 void ParticleEditor::New()
 {
     Open("Urho2D/fire.pex");
-
-    fileName_.Clear();
 }
 
-void ParticleEditor::Open(const String& fileName)
+
+void ParticleEditor::RemoveSelected()
 {
-    if (particleNode_)
-    {
-        particleNode_->Remove();
-        particleNode_ = 0;
+    RemoveParticleNode(selectedParticleNodeId_);
+}
+
+
+bool ParticleEditor::RemoveParticleNode(const String& fileName)
+{
+    auto it = particleNodes_.find(fileName);
+    if (it != particleNodes_.end()) {
+        SharedPtr<Node> node = it->second;
+        node->Remove();
+        particleNodes_.erase(it);
+        return true;
     }
 
+    return false;
+}
+
+void ParticleEditor::AddParticleNode(const String& fileName)
+{
     ResourceCache* cache = GetSubsystem<ResourceCache>();
     ParticleEffect2D* particleEffect = cache->GetResource<ParticleEffect2D>(fileName);
-    if (!particleEffect)
-    {
+    if (!particleEffect) {
         ErrorExit("Open particle effect failed " + fileName);
         return;
     }
 
-    fileName_ = fileName;
-
-    particleNode_ = scene_->CreateChild("ParticleEmitter2D");
-    ParticleEmitter2D* particleEmitter = particleNode_->CreateComponent<ParticleEmitter2D>();
+    SharedPtr<Node> node = SharedPtr<Node>(scene_->CreateChild("ParticleEmitter2D"));
+    ParticleEmitter2D* particleEmitter = node->CreateComponent<ParticleEmitter2D>();
     particleEmitter->SetEffect(particleEffect);
 
+    particleNodes_.insert(std::make_pair(fileName, node));
+
+    // cache active
+    if (!particleNode_) {
+        particleNode_ = node;
+        fileName_ = fileName;
+    }
+}
+
+void ParticleEditor::Open(const String& fileName)
+{
+    AddParticleNode(fileName);
     mainWindow_->UpdateWidget();
 }
 

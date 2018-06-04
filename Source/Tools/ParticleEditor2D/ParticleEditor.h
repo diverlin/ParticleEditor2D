@@ -86,18 +86,25 @@ private:
     /// Handle render update.
     void HandleRenderUpdate(StringHash eventType, VariantMap& eventData);
 
+    void RemoveSelected();
+    bool RemoveParticleNode(const String&);
+    void AddParticleNode(const String&);
+
     /// Editor main window.
     MainWindow* mainWindow_;
     /// Engine.
     SharedPtr<Engine> engine_;
     /// Scene.
     SharedPtr<Scene> scene_;
-    /// File name
-    String fileName_;
     /// Camera node.
     SharedPtr<Node> cameraNode_;
-    /// Particle node.
+    /// Particle nodes <filename, Node>.
+    std::map<String, SharedPtr<Node>> particleNodes_;
+
+    String fileName_;
     SharedPtr<Node> particleNode_;
+
+    int selectedParticleNodeId_ = -1;
 };
 
 }
