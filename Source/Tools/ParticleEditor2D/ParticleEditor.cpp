@@ -123,13 +123,13 @@ bool ParticleEditor::RemoveParticleNode(const String& fileName)
     return false;
 }
 
-void ParticleEditor::AddParticleNode(const String& fileName)
+bool ParticleEditor::AddParticleNode(const String& fileName)
 {
     ResourceCache* cache = GetSubsystem<ResourceCache>();
     ParticleEffect2D* particleEffect = cache->GetResource<ParticleEffect2D>(fileName);
     if (!particleEffect) {
         ErrorExit("Open particle effect failed " + fileName);
-        return;
+        return false;
     }
 
     SharedPtr<Node> node = SharedPtr<Node>(scene_->CreateChild("ParticleEmitter2D"));
@@ -143,12 +143,16 @@ void ParticleEditor::AddParticleNode(const String& fileName)
         particleNode_ = node;
         fileName_ = fileName;
     }
+    emit newParticleNodeAdded(QString(fileName_.CString()));
+    return true;
 }
 
 void ParticleEditor::Open(const String& fileName)
 {
-    AddParticleNode(fileName);
-    mainWindow_->UpdateWidget();
+    bool result = AddParticleNode(fileName);
+    if (result) {
+        mainWindow_->UpdateWidget();
+    }
 }
 
 void ParticleEditor::Save(const String& fileName)

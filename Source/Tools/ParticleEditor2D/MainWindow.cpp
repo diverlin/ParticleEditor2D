@@ -24,6 +24,8 @@
 #include "MainWindow.h"
 #include "ParticleAttributeEditor.h"
 #include "ParticleEditor.h"
+#include "NodeManagerWidget.h"
+#include "NodeItemWidget.h"
 
 #include <Urho3D/Graphics/Camera.h>
 #include <Urho3D/Core/Context.h>
@@ -169,6 +171,16 @@ void MainWindow::CreateToolBar()
 
 void MainWindow::CreateDockWidgets()
 {
+    nodeManagerWidget_ = new NodeManagerWidget(this);
+    QDockWidget* topDockWidget = new QDockWidget(tr("Layers"));
+    addDockWidget(Qt::TopDockWidgetArea, topDockWidget);
+    topDockWidget->setWidget(nodeManagerWidget_);
+
+    connect(ParticleEditor::Get(), &ParticleEditor::newParticleNodeAdded, [this](QString key) {
+        NodeItemWidget* nodeItemWIdget = new NodeItemWidget(key);
+        nodeManagerWidget_->add(nodeItemWIdget);
+    });
+
     emitterAttributeEditor_ = new EmitterAttributeEditor(context_);
 
     QDockWidget* eaDockWidget = new QDockWidget(tr("Emitter Attributes"));

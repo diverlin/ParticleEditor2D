@@ -66,6 +66,9 @@ public:
     /// Return editor pointer.
     static ParticleEditor* Get();
 
+signals:
+    void newParticleNodeAdded(QString);
+
 private slots:
     // Timeout handler.
     void OnTimeout();
@@ -88,7 +91,7 @@ private:
 
     void RemoveSelected();
     bool RemoveParticleNode(const String&);
-    void AddParticleNode(const String&);
+    bool AddParticleNode(const String&);
 
     /// Editor main window.
     MainWindow* mainWindow_;
