@@ -51,7 +51,8 @@ NodeItemWidget::NodeItemWidget(const QString& key)
 
     m_leName->setText(key);
     m_leName->setReadOnly(true);
-    m_cbVisible->setText("eye");
+    m_cbVisible->setText("visible");
+    m_cbVisible->setChecked(true);
     m_pbDelete->setText("del");
     m_leNodePosition->setText("0,0");
 

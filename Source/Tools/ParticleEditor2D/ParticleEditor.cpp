@@ -115,8 +115,7 @@ bool ParticleEditor::SetVisible(const String& key, bool visible)
     auto it = particleNodes_.find(key);
     if (it != particleNodes_.end()) {
         SharedPtr<Node> node = it->second;
-//        node->Remove();
-//        particleNodes_.erase(it);
+        node->SetEnabled(visible);
         return true;
     }
 
