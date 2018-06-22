@@ -37,20 +37,37 @@ NodeManagerWidget::NodeManagerWidget(QWidget* parent) :
 
 NodeManagerWidget::~NodeManagerWidget()
 {
-    for (int i=0; i<layout()->count(); ++i) {
-        QLayoutItem* item = layout()->takeAt(i);
-        delete item;
-    }
 }
 
 void NodeManagerWidget::add(NodeItemWidget* item)
 {
+    auto it = m_widgets.find(item->key());
+    assert(it == m_widgets.end());
+
+    connect(item, &NodeItemWidget::visibleChanged, this, [this](const QString& key, bool visible){
+        emit visibleChanged(key, visible);
+    });
+    connect(item, &NodeItemWidget::deleteRequested, this, [this](const QString& key){
+        emit deleteRequested(key);
+    });
+    connect(item, &NodeItemWidget::nodePositionChanged, this, [this](const QString& key, int x, int y){
+        emit nodePositionChanged(key, x, y);
+    });
+
+    m_widgets.insert(std::make_pair(item->key(), item));
     layout()->addWidget(item);
 }
 
-void NodeManagerWidget::remove(NodeItemWidget* item)
+bool NodeManagerWidget::remove(const QString& key)
 {
-    layout()->removeWidget(item);
+    auto it = m_widgets.find(key);
+    if (it != m_widgets.end()) {
+        NodeItemWidget* item = it->second;
+        layout()->removeWidget(item);
+        delete item;
+        return true;
+    }
+    return false;
 }
 
 }

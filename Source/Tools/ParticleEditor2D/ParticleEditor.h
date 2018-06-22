@@ -51,6 +51,10 @@ public:
     /// Run.
     int Run();
 
+    bool SetVisible(const String& key, bool visible);
+    bool RemoveParticleNode(const String& key);
+    bool SetParticleNodePosition(const String& key, int x, int y);
+
     void New();
     void Open(const String& fileName);
     void Save(const String& fileName);
@@ -67,7 +71,7 @@ public:
     static ParticleEditor* Get();
 
 signals:
-    void newParticleNodeAdded(QString);
+    void NewParticleNodeAdded(QString);
 
 private slots:
     // Timeout handler.
@@ -89,8 +93,7 @@ private:
     /// Handle render update.
     void HandleRenderUpdate(StringHash eventType, VariantMap& eventData);
 
-    void RemoveSelected();
-    bool RemoveParticleNode(const String&);
+//    void RemoveSelected();
     bool AddParticleNode(const String&);
 
     /// Editor main window.
@@ -107,7 +110,7 @@ private:
     String fileName_;
     SharedPtr<Node> particleNode_;
 
-    int selectedParticleNodeId_ = -1;
+//    int selectedParticleNodeId_ = -1;
 };
 
 }

@@ -37,7 +37,15 @@ public:
     virtual ~NodeManagerWidget();
 
     void add(NodeItemWidget*);
-    void remove(NodeItemWidget*);
+    bool remove(const QString& key);
+
+signals:
+    void visibleChanged(const QString&, bool);
+    void deleteRequested(const QString&);
+    void nodePositionChanged(const QString&, int, int);
+
+private:
+    std::map<QString, NodeItemWidget*> m_widgets;
 };
 
 }

@@ -83,13 +83,11 @@ int ParticleEditor::Run()
     if (!engine_->Initialize(engineParameters))
         return -1;
 
+    mainWindow_->CreateWidgets();
+
     CreateScene();
     CreateConsole();
     CreateDebugHud();
-
-    mainWindow_->CreateWidgets();
-
-    New();
 
     QTimer timer;
     connect(&timer, SIGNAL(timeout()), this, SLOT(OnTimeout()));
@@ -98,23 +96,39 @@ int ParticleEditor::Run()
     return QApplication::exec();
 }
 
+
 void ParticleEditor::New()
 {
     Open("Urho2D/fire.pex");
+    Open("Urho2D/sun2.pex");
+    Open("Urho2D/greenspiral.pex");
 }
 
 
-void ParticleEditor::RemoveSelected()
-{
-    RemoveParticleNode(selectedParticleNodeId_);
-}
+//void ParticleEditor::RemoveSelected()
+//{
+//    RemoveParticleNode(selectedParticleNodeId_);
+//}
 
-
-bool ParticleEditor::RemoveParticleNode(const String& fileName)
+bool ParticleEditor::SetVisible(const String& key, bool visible)
 {
-    auto it = particleNodes_.find(fileName);
+    auto it = particleNodes_.find(key);
     if (it != particleNodes_.end()) {
         SharedPtr<Node> node = it->second;
+//        node->Remove();
+//        particleNodes_.erase(it);
+        return true;
+    }
+
+    return false;
+}
+
+bool ParticleEditor::RemoveParticleNode(const String& key)
+{
+    auto it = particleNodes_.find(key);
+    if (it != particleNodes_.end()) {
+        SharedPtr<Node> node = it->second;
+        scene_->RemoveChild(node);
         node->Remove();
         particleNodes_.erase(it);
         return true;
@@ -122,6 +136,19 @@ bool ParticleEditor::RemoveParticleNode(const String& fileName)
 
     return false;
 }
+
+bool ParticleEditor::SetParticleNodePosition(const String& key, int x, int y)
+{
+    auto it = particleNodes_.find(key);
+    if (it != particleNodes_.end()) {
+        SharedPtr<Node> node = it->second;
+        node->SetPosition2D(Vector2(x,y));
+        return true;
+    }
+
+    return false;
+}
+
 
 bool ParticleEditor::AddParticleNode(const String& fileName)
 {
@@ -143,7 +170,9 @@ bool ParticleEditor::AddParticleNode(const String& fileName)
         particleNode_ = node;
         fileName_ = fileName;
     }
-    emit newParticleNodeAdded(QString(fileName_.CString()));
+    QString key(fileName.CString());
+    qInfo()<<"before send="<<key;
+    emit NewParticleNodeAdded(key);
     return true;
 }
 

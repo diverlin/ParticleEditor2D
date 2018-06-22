@@ -38,15 +38,19 @@ public:
     NodeItemWidget(const QString& key);
     virtual ~NodeItemWidget();
 
+    const QString& key() const { return m_key; }
+
 signals:
     void visibleChanged(const QString&, bool);
     void deleteRequested(const QString&);
+    void nodePositionChanged(const QString&, int x, int y);
 
 private:
     QString m_key;
-    QCheckBox* m_checkboxVisible = nullptr;
-    QLineEdit* m_lineeditName = nullptr;
-    QPushButton* m_pushbuttonDelete = nullptr;
+    QCheckBox* m_cbVisible = nullptr;
+    QLineEdit* m_leName = nullptr;
+    QPushButton* m_pbDelete = nullptr;
+    QLineEdit* m_leNodePosition = nullptr;
 };
 
 }

@@ -23,10 +23,10 @@
 #include "NodeItemWidget.h"
 
 #include <QVBoxLayout>
-
 #include <QCheckBox>
 #include <QLineEdit>
 #include <QPushButton>
+#include <QDebug>
 
 namespace Urho3D
 {
@@ -34,30 +34,44 @@ namespace Urho3D
 NodeItemWidget::NodeItemWidget(const QString& key)
     :
     QWidget()
-  , m_checkboxVisible(new QCheckBox(this))
-  , m_lineeditName(new QLineEdit(this))
-  , m_pushbuttonDelete(new QPushButton(this))
+  , m_cbVisible(new QCheckBox(this))
+  , m_leName(new QLineEdit(this))
+  , m_pbDelete(new QPushButton(this))
+  , m_leNodePosition(new QLineEdit(this))
   , m_key(key)
 {
     auto layout = new QVBoxLayout;
 
-    layout->addWidget(m_checkboxVisible);
-    layout->addWidget(m_lineeditName);
-    layout->addWidget(m_pushbuttonDelete);
+    layout->addWidget(m_cbVisible);
+    layout->addWidget(m_leName);
+    layout->addWidget(m_pbDelete);
+    layout->addWidget(m_leNodePosition);
 
     setLayout(layout);
 
-    m_lineeditName->setText(key);
-    m_lineeditName->setReadOnly(true);
-    m_checkboxVisible->setText("eye");
-    m_pushbuttonDelete->setText("del");
+    m_leName->setText(key);
+    m_leName->setReadOnly(true);
+    m_cbVisible->setText("eye");
+    m_pbDelete->setText("del");
+    m_leNodePosition->setText("0,0");
 
-    connect(m_pushbuttonDelete, &QPushButton::clicked, [this]() {
+    connect(m_pbDelete, &QPushButton::clicked, [this]() {
         emit deleteRequested(m_key);
     });
-    connect(m_checkboxVisible, &QPushButton::toggled, [this](bool checked) {
+    connect(m_cbVisible, &QPushButton::toggled, [this](bool checked) {
         emit visibleChanged(m_key, checked);
     });
+
+    connect(m_leNodePosition, &QLineEdit::textChanged, this, [this](const QString& data) {
+        int x, y = 0;
+        QStringList numbers = data.split(",");
+        if (numbers.size() == 2) {
+            x = std::atoi(numbers[0].toStdString().c_str());
+            y = std::atoi(numbers[1].toStdString().c_str());
+            emit nodePositionChanged(m_key, x, y);
+        }
+    });
+
 }
 
 NodeItemWidget::~NodeItemWidget()
