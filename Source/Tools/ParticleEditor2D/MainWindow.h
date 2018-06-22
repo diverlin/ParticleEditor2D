@@ -37,6 +37,7 @@ namespace Urho3D
 
 class EmitterAttributeEditor;
 class ParticleAttributeEditor;
+class NodeManagerWidget;
 class ScrollAreaWidget;
 
 /// Editor main window class.
@@ -108,6 +109,8 @@ private:
     EmitterAttributeEditor* emitterAttributeEditor_;
     /// Inspector window.
     ParticleAttributeEditor* particleAttributeEditor_;
+
+    NodeManagerWidget* nodeManagerWidget_ = nullptr;
 };
 
 }

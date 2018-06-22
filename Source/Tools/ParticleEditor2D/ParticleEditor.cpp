@@ -83,13 +83,11 @@ int ParticleEditor::Run()
     if (!engine_->Initialize(engineParameters))
         return -1;
 
+    mainWindow_->CreateWidgets();
+
     CreateScene();
     CreateConsole();
     CreateDebugHud();
-
-    mainWindow_->CreateWidgets();
-
-    New();
 
     QTimer timer;
     connect(&timer, SIGNAL(timeout()), this, SLOT(OnTimeout()));
@@ -98,36 +96,91 @@ int ParticleEditor::Run()
     return QApplication::exec();
 }
 
+
 void ParticleEditor::New()
 {
     Open("Urho2D/fire.pex");
+    Open("Urho2D/sun2.pex");
+    Open("Urho2D/greenspiral.pex");
+}
 
-    fileName_.Clear();
+
+//void ParticleEditor::RemoveSelected()
+//{
+//    RemoveParticleNode(selectedParticleNodeId_);
+//}
+
+bool ParticleEditor::SetVisible(const String& key, bool visible)
+{
+    auto it = particleNodes_.find(key);
+    if (it != particleNodes_.end()) {
+        SharedPtr<Node> node = it->second;
+        node->SetEnabled(visible);
+        return true;
+    }
+
+    return false;
+}
+
+bool ParticleEditor::RemoveParticleNode(const String& key)
+{
+    auto it = particleNodes_.find(key);
+    if (it != particleNodes_.end()) {
+        SharedPtr<Node> node = it->second;
+        scene_->RemoveChild(node);
+        node->Remove();
+        particleNodes_.erase(it);
+        return true;
+    }
+
+    return false;
+}
+
+bool ParticleEditor::SetParticleNodePosition(const String& key, int x, int y)
+{
+    auto it = particleNodes_.find(key);
+    if (it != particleNodes_.end()) {
+        SharedPtr<Node> node = it->second;
+        node->SetPosition2D(Vector2(x,y));
+        return true;
+    }
+
+    return false;
+}
+
+
+bool ParticleEditor::AddParticleNode(const String& fileName)
+{
+    ResourceCache* cache = GetSubsystem<ResourceCache>();
+    ParticleEffect2D* particleEffect = cache->GetResource<ParticleEffect2D>(fileName);
+    if (!particleEffect) {
+        ErrorExit("Open particle effect failed " + fileName);
+        return false;
+    }
+
+    SharedPtr<Node> node = SharedPtr<Node>(scene_->CreateChild("ParticleEmitter2D"));
+    ParticleEmitter2D* particleEmitter = node->CreateComponent<ParticleEmitter2D>();
+    particleEmitter->SetEffect(particleEffect);
+
+    particleNodes_.insert(std::make_pair(fileName, node));
+
+    // cache active
+    if (!particleNode_) {
+        particleNode_ = node;
+        fileName_ = fileName;
+    }
+    QString key(fileName.CString());
+    qInfo()<<"before send="<<key;
+    emit NewParticleNodeAdded(key);
+    return true;
 }
 
 void ParticleEditor::Open(const String& fileName)
 {
-    if (particleNode_)
-    {
-        particleNode_->Remove();
-        particleNode_ = 0;
+    bool result = AddParticleNode(fileName);
+    if (result) {
+        mainWindow_->UpdateWidget();
     }
-
-    ResourceCache* cache = GetSubsystem<ResourceCache>();
-    ParticleEffect2D* particleEffect = cache->GetResource<ParticleEffect2D>(fileName);
-    if (!particleEffect)
-    {
-        ErrorExit("Open particle effect failed " + fileName);
-        return;
-    }
-
-    fileName_ = fileName;
-
-    particleNode_ = scene_->CreateChild("ParticleEmitter2D");
-    ParticleEmitter2D* particleEmitter = particleNode_->CreateComponent<ParticleEmitter2D>();
-    particleEmitter->SetEffect(particleEffect);
-
-    mainWindow_->UpdateWidget();
 }
 
 void ParticleEditor::Save(const String& fileName)

@@ -24,6 +24,8 @@
 #include "MainWindow.h"
 #include "ParticleAttributeEditor.h"
 #include "ParticleEditor.h"
+#include "NodeManagerWidget.h"
+#include "NodeItemWidget.h"
 
 #include <Urho3D/Graphics/Camera.h>
 #include <Urho3D/Core/Context.h>
@@ -55,7 +57,7 @@ MainWindow::MainWindow(Context* context) :
     QWidget* widget = new QWidget();
     setCentralWidget(widget);
     
-    widget->setFixedSize(800, 800); // workaround, the SDL2_GetWindowSize(window, width, height) doesn't get actual window size when QWidget is actually resized
+    widget->setFixedSize(1200, 700); // workaround, the SDL2_GetWindowSize(window, width, height) doesn't get actual window size when QWidget is actually resized
     widget->setUpdatesEnabled(false);
     widget->setFocusPolicy(Qt::StrongFocus);
 
@@ -169,6 +171,28 @@ void MainWindow::CreateToolBar()
 
 void MainWindow::CreateDockWidgets()
 {
+    nodeManagerWidget_ = new NodeManagerWidget(this);
+    QDockWidget* topDockWidget = new QDockWidget(tr("Layers"));
+    addDockWidget(Qt::TopDockWidgetArea, topDockWidget);
+    topDockWidget->setWidget(nodeManagerWidget_);
+
+    connect(ParticleEditor::Get(), &ParticleEditor::NewParticleNodeAdded, this, [this](QString key) {
+        qInfo()<<key;
+        NodeItemWidget* nodeItemWIdget = new NodeItemWidget(key);
+        nodeManagerWidget_->add(nodeItemWIdget);
+    });
+
+    connect(nodeManagerWidget_, &NodeManagerWidget::visibleChanged, this, [this](const QString& key, bool visible) {
+        ParticleEditor::Get()->SetVisible(String(key.toStdString().c_str()), visible);
+    });
+    connect(nodeManagerWidget_, &NodeManagerWidget::deleteRequested, this, [this](const QString& key) {
+        assert(nodeManagerWidget_->remove(key));
+        assert(ParticleEditor::Get()->RemoveParticleNode(String(key.toStdString().c_str())));
+    });
+    connect(nodeManagerWidget_, &NodeManagerWidget::nodePositionChanged, this, [this](const QString& key, int x, int y) {
+        assert(ParticleEditor::Get()->SetParticleNodePosition(String(key.toStdString().c_str()), x, y));
+    });
+
     emitterAttributeEditor_ = new EmitterAttributeEditor(context_);
 
     QDockWidget* eaDockWidget = new QDockWidget(tr("Emitter Attributes"));

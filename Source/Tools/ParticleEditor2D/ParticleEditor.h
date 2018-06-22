@@ -51,6 +51,10 @@ public:
     /// Run.
     int Run();
 
+    bool SetVisible(const String& key, bool visible);
+    bool RemoveParticleNode(const String& key);
+    bool SetParticleNodePosition(const String& key, int x, int y);
+
     void New();
     void Open(const String& fileName);
     void Save(const String& fileName);
@@ -65,6 +69,9 @@ public:
 
     /// Return editor pointer.
     static ParticleEditor* Get();
+
+signals:
+    void NewParticleNodeAdded(QString);
 
 private slots:
     // Timeout handler.
@@ -86,18 +93,24 @@ private:
     /// Handle render update.
     void HandleRenderUpdate(StringHash eventType, VariantMap& eventData);
 
+//    void RemoveSelected();
+    bool AddParticleNode(const String&);
+
     /// Editor main window.
     MainWindow* mainWindow_;
     /// Engine.
     SharedPtr<Engine> engine_;
     /// Scene.
     SharedPtr<Scene> scene_;
-    /// File name
-    String fileName_;
     /// Camera node.
     SharedPtr<Node> cameraNode_;
-    /// Particle node.
+    /// Particle nodes <filename, Node>.
+    std::map<String, SharedPtr<Node>> particleNodes_;
+
+    String fileName_;
     SharedPtr<Node> particleNode_;
+
+//    int selectedParticleNodeId_ = -1;
 };
 
 }
