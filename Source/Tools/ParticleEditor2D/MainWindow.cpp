@@ -41,6 +41,7 @@
 #include <QToolBar>
 #include <QDebug>
 #include <QResizeEvent>
+#include <QMessageBox>
 
 
 namespace Urho3D
@@ -182,14 +183,16 @@ void MainWindow::CreateDockWidgets()
     });
 
     connect(nodeManagerWidget_, &NodeManagerWidget::visibleChanged, this, [this](const QString& key, bool visible) {
-        ParticleEditor::Get()->SetVisible(String(key.toStdString().c_str()), visible);
+        assert(ParticleEditor::Get()->SetVisible(String(key.toStdString().c_str()), visible));
     });
     connect(nodeManagerWidget_, &NodeManagerWidget::deleteRequested, this, [this](const QString& key) {
-        assert(nodeManagerWidget_->remove(key));
         assert(ParticleEditor::Get()->RemoveParticleNode(String(key.toStdString().c_str())));
     });
     connect(nodeManagerWidget_, &NodeManagerWidget::nodePositionChanged, this, [this](const QString& key, int x, int y) {
         assert(ParticleEditor::Get()->SetParticleNodePosition(String(key.toStdString().c_str()), x, y));
+    });
+    connect(nodeManagerWidget_, &NodeManagerWidget::acceptKeyChangeRequest, this, [this](QString key, QString newKey) {
+        assert(ParticleEditor::Get()->changeKey(String(key.toStdString().c_str()), String(newKey.toStdString().c_str())));
     });
 
     emitterAttributeEditor_ = new EmitterAttributeEditor(context_);
@@ -217,7 +220,7 @@ void MainWindow::CreateDockWidgets()
 
 void MainWindow::HandleNewAction()
 {
-    ParticleEditor::Get()->New();
+    showInfoMessageBox("Not implemented yet...");
 }
 
 void MainWindow::HandleOpenAction()
@@ -272,4 +275,13 @@ void MainWindow::HandleBackgroundAction()
     renderer->GetDefaultZone()->SetFogColor(newColor);
 }
 
+void showInfoMessageBox(const QString& msg)
+{
+    QMessageBox msgBox;
+    msgBox.setText(msg);
+    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.setDefaultButton(QMessageBox::Ok);
+    msgBox.exec();
 }
+
+} // namespace Urho3D

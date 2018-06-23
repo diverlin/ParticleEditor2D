@@ -39,12 +39,17 @@ public:
     virtual ~NodeItemWidget();
 
     void setNodePosition(int x, int y);
+    void setKey(const QString& key) { m_key = key; }
+
     const QString& key() const { return m_key; }
+    void rejectNewKeyCandidate();
+    void acceptNewKeyCandidate();
 
 signals:
     void visibleChanged(const QString&, bool);
     void deleteRequested(const QString&);
     void nodePositionChanged(const QString&, int x, int y);
+    void changeKeyRequest(QString, QString);
 
 private:
     QString m_key;
@@ -55,4 +60,4 @@ private:
     QLineEdit* m_leNodePosition = nullptr;
 };
 
-}
+} // namespace Urho3D

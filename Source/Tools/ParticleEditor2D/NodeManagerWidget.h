@@ -39,18 +39,25 @@ public:
     NodeManagerWidget(QWidget* parent);
     virtual ~NodeManagerWidget();
 
+    NodeItemWidget* itemWidget(const QString&) const;
+
     void add(NodeItemWidget*);
-    bool remove(const QString& key);
+    bool remove(const QString&);
+    bool changeKey(const QString&, const QString&);
 
 signals:
     void visibleChanged(const QString&, bool);
     void deleteRequested(const QString&);
     void nodePositionChanged(const QString&, int, int);
+    void acceptKeyChangeRequest(QString, QString);
 
 private:
     QPushButton* m_pbToggleGrid = nullptr;
     QSpacerItem* m_horizontalSpacer = nullptr;
     std::map<QString, NodeItemWidget*> m_widgets;
+
+    NodeItemWidget* takeItemWidget(const QString&);
+    bool isKeyUnique(const QString& key) const;
 };
 
 }
