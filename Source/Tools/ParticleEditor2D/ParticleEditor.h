@@ -118,6 +118,7 @@ private:
     QString relativePathFrom(QString path) const;
 
     bool isFileAlreadyOpened(const QString& key) const;
+    bool renameFile(const QString& fromKey, const QString& toKey) const;
 };
 
 }

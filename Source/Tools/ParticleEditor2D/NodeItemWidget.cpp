@@ -26,7 +26,12 @@
 #include <QCheckBox>
 #include <QLineEdit>
 #include <QPushButton>
+#include <QTimer>
 #include <QDebug>
+
+namespace {
+const int DELAY_MS = 2000;
+} // namespace
 
 namespace Urho3D
 {
@@ -108,12 +113,18 @@ void NodeItemWidget::setNodePosition(int x, int y)
 
 void NodeItemWidget::rejectNewKeyCandidate()
 {
-    m_leName->setStyleSheet("background: red;");
+    m_leName->setStyleSheet("color: black; background: #FFA76B;");
+    QTimer::singleShot(DELAY_MS, [this]{
+        m_leName->setStyleSheet("");
+    });
 }
 
 void NodeItemWidget::acceptNewKeyCandidate()
 {
-    m_leName->setStyleSheet("");
+    m_leName->setStyleSheet("color: black; background: #2ECC40;");
+    QTimer::singleShot(DELAY_MS, [this]{
+        m_leName->setStyleSheet("");
+    });
 }
 
 

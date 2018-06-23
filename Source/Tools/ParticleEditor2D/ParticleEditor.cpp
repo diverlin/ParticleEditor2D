@@ -372,9 +372,22 @@ bool ParticleEditor::changeKey(const String& fromKey, const String& toKey)
         SharedPtr<Node> node = it->second;
         particleNodes_.erase(it);
         particleNodes_.insert(std::make_pair(toKey, node));
-        return true;
+        return renameFile(fromKey.CString(), toKey.CString());
     }
     return false;
+}
+
+bool ParticleEditor::renameFile(const QString& fromKey, const QString& toKey) const
+{
+    QString absPathFrom( absolutePathFrom(fromKey) );
+    QString absPathTo( absolutePathFrom(toKey) );
+
+    QFile file(absPathFrom);
+    file.open(QIODevice::WriteOnly | QIODevice::Text);
+    bool result = file.rename(absPathTo);
+    file.close();
+
+    return result;
 }
 
 } // namespace Urho3D
