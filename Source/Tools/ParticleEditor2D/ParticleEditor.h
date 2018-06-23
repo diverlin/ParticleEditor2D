@@ -121,4 +121,6 @@ private:
     bool renameFile(const QString& fromKey, const QString& toKey) const;
 };
 
-}
+QString freeBackupPath(QString path, QString ext);
+
+} // namespace Urho3D

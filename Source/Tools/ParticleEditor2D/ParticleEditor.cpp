@@ -382,12 +382,22 @@ bool ParticleEditor::renameFile(const QString& fromKey, const QString& toKey) co
     QString absPathFrom( absolutePathFrom(fromKey) );
     QString absPathTo( absolutePathFrom(toKey) );
 
-    QFile file(absPathFrom);
-    file.open(QIODevice::WriteOnly | QIODevice::Text);
-    bool result = file.rename(absPathTo);
-    file.close();
+    if (QFile(absPathTo).exists()) {
+        QString backup = freeBackupPath(absPathTo, QString(".pex"));
+        QFile::rename(absPathTo, backup);
+    }
+    return QFile::rename(absPathFrom, absPathTo);
+}
 
-    return result;
+QString freeBackupPath(QString path, QString ext) {
+    if (QFile(path).exists()) {
+        path.replace(ext, "");
+        path += ".backup";
+        path += ext;
+        return freeBackupPath(path, ext);
+    } else {
+        return path;
+    }
 }
 
 } // namespace Urho3D
