@@ -86,6 +86,7 @@ int ParticleEditor::Run()
     mainWindow_->CreateWidgets();
 
     CreateScene();
+    CreateParticles();
     CreateConsole();
     CreateDebugHud();
 
@@ -96,19 +97,21 @@ int ParticleEditor::Run()
     return QApplication::exec();
 }
 
-
-void ParticleEditor::New()
-{
-    Open("Urho2D/fire.pex");
-    Open("Urho2D/sun2.pex");
-    Open("Urho2D/greenspiral.pex");
-}
-
-
 //void ParticleEditor::RemoveSelected()
 //{
 //    RemoveParticleNode(selectedParticleNodeId_);
 //}
+
+void ParticleEditor::CreateParticles()
+{
+    QList<QString> files;
+    files << "Data/Urho2D/fire.pex"
+          << "Data/Urho2D/sun2.pex"
+          << "Data/Urho2D/greenspiral.pex";
+    for(const QString& file: files) {
+        Open(file.toStdString().c_str());
+    }
+}
 
 bool ParticleEditor::SetVisible(const String& key, bool visible)
 {
@@ -118,7 +121,6 @@ bool ParticleEditor::SetVisible(const String& key, bool visible)
         node->SetEnabled(visible);
         return true;
     }
-
     return false;
 }
 
@@ -148,13 +150,11 @@ bool ParticleEditor::SetParticleNodePosition(const String& key, int x, int y)
     return false;
 }
 
-
 bool ParticleEditor::AddParticleNode(const String& fileName)
 {
     ResourceCache* cache = GetSubsystem<ResourceCache>();
     ParticleEffect2D* particleEffect = cache->GetResource<ParticleEffect2D>(fileName);
     if (!particleEffect) {
-        ErrorExit("Open particle effect failed " + fileName);
         return false;
     }
 
@@ -170,17 +170,52 @@ bool ParticleEditor::AddParticleNode(const String& fileName)
         fileName_ = fileName;
     }
     QString key(fileName.CString());
-    qInfo()<<"before send="<<key;
     emit NewParticleNodeAdded(key);
     return true;
 }
 
-void ParticleEditor::Open(const String& fileName)
+QString ParticleEditor::absolutePathFrom(QString path) const
 {
-    bool result = AddParticleNode(fileName);
-    if (result) {
-        mainWindow_->UpdateWidget();
+    QString workdir = qApp->applicationDirPath();
+    if(!path.startsWith(workdir)) {
+        path = workdir + "/" + path;
     }
+    return path;
+}
+
+QString ParticleEditor::relativePathFrom(QString path) const
+{
+    path.replace(qApp->applicationDirPath(), "");
+    if (path.startsWith("/")) {
+        path.remove(0, 1);
+    }
+    return path;
+}
+
+bool ParticleEditor::isFileAlreadyOpened(const QString& key) const
+{
+    auto it = particleNodes_.find(key.toStdString().c_str());
+    return (it != particleNodes_.end());
+}
+
+bool ParticleEditor::Open(QString filepath)
+{
+    QString abs_filepath( absolutePathFrom(filepath) );
+    QString rel_filepath( relativePathFrom(filepath) );
+    if (!QFile(abs_filepath).exists()) {
+        showInfoMessageBox(QString("File %1 doesn't exist. Abort.").arg(abs_filepath));
+        return false;
+    }
+    if (isFileAlreadyOpened(rel_filepath)) {
+        showInfoMessageBox(QString("The %1 already opened. Abort").arg(rel_filepath));
+        return false;
+    }
+    if (!AddParticleNode(rel_filepath.toStdString().c_str())) {
+        showInfoMessageBox(QString("Fail to open %1 particle effect. Abort").arg(rel_filepath));
+        return false;
+    }
+    mainWindow_->UpdateWidget();
+    return true;
 }
 
 void ParticleEditor::Save(const String& fileName)
@@ -190,9 +225,8 @@ void ParticleEditor::Save(const String& fileName)
         return;
 
     File file(context_);
-    if (!file.Open(fileName, FILE_WRITE))
-    {
-        ErrorExit("Open file failed " + fileName);
+    if (!file.Open(fileName, FILE_WRITE)) {
+        showInfoMessageBox(QString("Open file with write abilities failed %1").arg(fileName.CString()));
         return;
     }
 
@@ -251,8 +285,6 @@ void ParticleEditor::CreateScene()
 
     Renderer* renderer = GetSubsystem<Renderer>();
     renderer->SetViewport(0, viewport);
-
-    New();
 }
 
 void ParticleEditor::CreateConsole()
@@ -333,4 +365,39 @@ void ParticleEditor::HandleRenderUpdate(StringHash eventType, VariantMap& eventD
     debugRenderer->Render();
 }
 
+bool ParticleEditor::changeKey(const String& fromKey, const String& toKey)
+{
+    auto it = particleNodes_.find(fromKey);
+    if (it != particleNodes_.end()) {
+        SharedPtr<Node> node = it->second;
+        particleNodes_.erase(it);
+        particleNodes_.insert(std::make_pair(toKey, node));
+        return renameFile(fromKey.CString(), toKey.CString());
+    }
+    return false;
 }
+
+bool ParticleEditor::renameFile(const QString& fromKey, const QString& toKey) const
+{
+    QString absPathFrom( absolutePathFrom(fromKey) );
+    QString absPathTo( absolutePathFrom(toKey) );
+
+    if (QFile(absPathTo).exists()) {
+        QString backup = freeBackupPath(absPathTo, QString(".pex"));
+        QFile::rename(absPathTo, backup);
+    }
+    return QFile::rename(absPathFrom, absPathTo);
+}
+
+QString freeBackupPath(QString path, QString ext) {
+    if (QFile(path).exists()) {
+        path.replace(ext, "");
+        path += ".backup";
+        path += ext;
+        return freeBackupPath(path, ext);
+    } else {
+        return path;
+    }
+}
+
+} // namespace Urho3D

@@ -26,6 +26,7 @@
 #include <QHBoxLayout>
 #include <QSpacerItem>
 #include <QPushButton>
+#include <QDebug>
 
 namespace Urho3D
 {
@@ -81,10 +82,21 @@ void NodeManagerWidget::add(NodeItemWidget* item)
         emit visibleChanged(key, visible);
     });
     connect(item, &NodeItemWidget::deleteRequested, this, [this](const QString& key){
+        assert(remove(key));
         emit deleteRequested(key);
     });
     connect(item, &NodeItemWidget::nodePositionChanged, this, [this](const QString& key, int x, int y){
         emit nodePositionChanged(key, x, y);
+    });
+    connect(item, &NodeItemWidget::changeKeyRequest, this, [this](QString key, QString newKeyCandidate){
+        NodeItemWidget* widget = itemWidget(key);
+        if (isKeyUnique(newKeyCandidate)) {
+            assert(changeKey(key, newKeyCandidate));
+            widget->acceptNewKeyCandidate();
+            emit acceptKeyChangeRequest(key, newKeyCandidate);
+        } else {
+            widget->rejectNewKeyCandidate();
+        }
     });
 
     m_widgets.insert(std::make_pair(item->key(), item));
@@ -93,16 +105,52 @@ void NodeManagerWidget::add(NodeItemWidget* item)
     layout()->addItem(m_horizontalSpacer);
 }
 
-bool NodeManagerWidget::remove(const QString& key)
-{
+NodeItemWidget* NodeManagerWidget::itemWidget(const QString& key) const {
     auto it = m_widgets.find(key);
     if (it != m_widgets.end()) {
         NodeItemWidget* item = it->second;
-        layout()->removeWidget(item);
-        delete item;
+        return item;
+    }
+    return nullptr;
+}
+
+NodeItemWidget* NodeManagerWidget::takeItemWidget(const QString& key) {
+    auto it = m_widgets.find(key);
+    if (it != m_widgets.end()) {
+        NodeItemWidget* item = it->second;
+        m_widgets.erase(it);
+        return item;
+    }
+    return nullptr;
+}
+
+bool NodeManagerWidget::changeKey(const QString& fromKey, const QString& toKey)
+{
+    NodeItemWidget* widget = takeItemWidget(fromKey);
+    if (widget) {
+        widget->setKey(toKey);
+        m_widgets.insert(std::make_pair(toKey, widget));
         return true;
     }
     return false;
 }
 
+bool NodeManagerWidget::remove(const QString& key)
+{
+    NodeItemWidget* item = itemWidget(key);
+    if (item) {
+        layout()->removeWidget(item);
+        delete item;
+        return true;
+    } else {
+        return false;
+    }
 }
+
+bool NodeManagerWidget::isKeyUnique(const QString& key) const
+{
+    NodeItemWidget* widget = itemWidget(key);
+    return (widget == nullptr);
+}
+
+} // namespace Urho3D

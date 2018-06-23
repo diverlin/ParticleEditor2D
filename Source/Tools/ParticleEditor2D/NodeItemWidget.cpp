@@ -26,7 +26,12 @@
 #include <QCheckBox>
 #include <QLineEdit>
 #include <QPushButton>
+#include <QTimer>
 #include <QDebug>
+
+namespace {
+const int DELAY_MS = 2000;
+} // namespace
 
 namespace Urho3D
 {
@@ -64,7 +69,6 @@ NodeItemWidget::NodeItemWidget(QWidget* parent, const QString& key)
     setLayout(layout);
 
     m_leName->setText(key);
-    m_leName->setReadOnly(true);
     m_cbVisible->setText("Visible");
     m_pbClone->setText("Clone");
     m_pbDelete->setText("Delete");
@@ -77,6 +81,11 @@ NodeItemWidget::NodeItemWidget(QWidget* parent, const QString& key)
     connect(m_cbVisible, &QPushButton::toggled, [this](bool checked) {
         emit visibleChanged(m_key, checked);
     });
+    connect(m_leName, &QLineEdit::returnPressed, this, [this]() {
+        QString newKeyCandidate = m_leName->text();
+        emit changeKeyRequest(m_key, newKeyCandidate);
+    });
+
 
     connect(m_leNodePosition, &QLineEdit::textChanged, this, [this](const QString& data) {
         int x, y = 0;
@@ -102,4 +111,21 @@ void NodeItemWidget::setNodePosition(int x, int y)
     m_leNodePosition->setText(text);
 }
 
+void NodeItemWidget::rejectNewKeyCandidate()
+{
+    m_leName->setStyleSheet("color: black; background: #FFA76B;");
+    QTimer::singleShot(DELAY_MS, [this]{
+        m_leName->setStyleSheet("");
+    });
 }
+
+void NodeItemWidget::acceptNewKeyCandidate()
+{
+    m_leName->setStyleSheet("color: black; background: #2ECC40;");
+    QTimer::singleShot(DELAY_MS, [this]{
+        m_leName->setStyleSheet("");
+    });
+}
+
+
+} // namespace Urho3D

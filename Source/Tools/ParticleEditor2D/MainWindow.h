@@ -113,4 +113,6 @@ private:
     NodeManagerWidget* nodeManagerWidget_ = nullptr;
 };
 
-}
+void showInfoMessageBox(const QString&);
+
+} // namespace Urho3D

@@ -22,6 +22,7 @@
 
 #include <Urho3D/Core/Object.h>
 #include <Urho3D/Container/Ptr.h>
+
 #include <QApplication>
 
 namespace Urho3D
@@ -55,9 +56,9 @@ public:
     bool RemoveParticleNode(const String& key);
     bool SetParticleNodePosition(const String& key, int x, int y);
 
-    void New();
-    void Open(const String& fileName);
+    bool Open(QString fileName);
     void Save(const String& fileName);
+    bool changeKey(const String& fromKey, const String& toKey);
 
     const String& GetFileName() const { return fileName_; }
     /// Return camera.
@@ -107,10 +108,19 @@ private:
     /// Particle nodes <filename, Node>.
     std::map<String, SharedPtr<Node>> particleNodes_;
 
-    String fileName_;
-    SharedPtr<Node> particleNode_;
+    String fileName_; // todo: remove this
+    SharedPtr<Node> particleNode_; // todo: remove this
 
 //    int selectedParticleNodeId_ = -1;
+    void CreateParticles();
+
+    QString absolutePathFrom(QString path) const;
+    QString relativePathFrom(QString path) const;
+
+    bool isFileAlreadyOpened(const QString& key) const;
+    bool renameFile(const QString& fromKey, const QString& toKey) const;
 };
 
-}
+QString freeBackupPath(QString path, QString ext);
+
+} // namespace Urho3D
