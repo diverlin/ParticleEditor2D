@@ -177,8 +177,7 @@ void MainWindow::CreateDockWidgets()
     topDockWidget->setWidget(nodeManagerWidget_);
 
     connect(ParticleEditor::Get(), &ParticleEditor::NewParticleNodeAdded, this, [this](QString key) {
-        qInfo()<<key;
-        NodeItemWidget* nodeItemWIdget = new NodeItemWidget(key);
+        NodeItemWidget* nodeItemWIdget = new NodeItemWidget(nodeManagerWidget_, key);
         nodeManagerWidget_->add(nodeItemWIdget);
     });
 

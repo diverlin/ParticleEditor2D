@@ -24,15 +24,48 @@
 #include "NodeItemWidget.h"
 
 #include <QHBoxLayout>
+#include <QSpacerItem>
+#include <QPushButton>
 
 namespace Urho3D
 {
     
 NodeManagerWidget::NodeManagerWidget(QWidget* parent) :
     QWidget(parent)
+  , m_pbToggleGrid(new QPushButton("grid"))
+  , m_horizontalSpacer(new QSpacerItem(20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum))
 {
-    QHBoxLayout* layout = new QHBoxLayout;
-    setLayout(layout);
+    setLayout(new QHBoxLayout);
+
+    layout()->setSizeConstraint(QLayout::SetMinimumSize);
+    layout()->setContentsMargins(0,0,0,0);
+    layout()->setSpacing(0);
+
+    layout()->addWidget(m_pbToggleGrid);
+    layout()->addItem(m_horizontalSpacer);
+
+    connect(m_pbToggleGrid, &QPushButton::clicked, this, [this]() {
+        float step = 2;
+        int size = m_widgets.size();
+        int rows = 2;
+        float size_x = float(size)/rows;
+
+        float left_border_x = -size/size_x * step;
+        float right_border_x = size/size_x * step;
+
+        float x = left_border_x;
+        float y = 0;
+        auto it = m_widgets.begin();
+        for(; it!=m_widgets.end(); ++it) {
+            NodeItemWidget* widget = it->second;
+            widget->setNodePosition(x,y);
+            x += step;
+            if (x >= right_border_x) {
+                x = left_border_x;
+                y += step;
+            }
+        }
+    });
 }
 
 NodeManagerWidget::~NodeManagerWidget()
@@ -55,7 +88,9 @@ void NodeManagerWidget::add(NodeItemWidget* item)
     });
 
     m_widgets.insert(std::make_pair(item->key(), item));
+    layout()->removeItem(m_horizontalSpacer);
     layout()->addWidget(item);
+    layout()->addItem(m_horizontalSpacer);
 }
 
 bool NodeManagerWidget::remove(const QString& key)

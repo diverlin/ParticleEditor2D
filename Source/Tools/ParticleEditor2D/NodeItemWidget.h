@@ -35,9 +35,10 @@ class NodeItemWidget : public QWidget
 {
     Q_OBJECT
 public:
-    NodeItemWidget(const QString& key);
+    NodeItemWidget(QWidget* parent, const QString& key);
     virtual ~NodeItemWidget();
 
+    void setNodePosition(int x, int y);
     const QString& key() const { return m_key; }
 
 signals:
@@ -48,8 +49,9 @@ signals:
 private:
     QString m_key;
     QCheckBox* m_cbVisible = nullptr;
-    QLineEdit* m_leName = nullptr;
+    QPushButton* m_pbClone = nullptr;
     QPushButton* m_pbDelete = nullptr;
+    QLineEdit* m_leName = nullptr;
     QLineEdit* m_leNodePosition = nullptr;
 };
 

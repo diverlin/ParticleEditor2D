@@ -24,6 +24,9 @@
 
 #include <QWidget>
 
+class QSpacerItem;
+class QPushButton;
+
 namespace Urho3D
 {
 
@@ -45,6 +48,8 @@ signals:
     void nodePositionChanged(const QString&, int, int);
 
 private:
+    QPushButton* m_pbToggleGrid = nullptr;
+    QSpacerItem* m_horizontalSpacer = nullptr;
     std::map<QString, NodeItemWidget*> m_widgets;
 };
 

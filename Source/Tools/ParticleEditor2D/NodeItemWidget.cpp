@@ -31,29 +31,44 @@
 namespace Urho3D
 {
     
-NodeItemWidget::NodeItemWidget(const QString& key)
+NodeItemWidget::NodeItemWidget(QWidget* parent, const QString& key)
     :
-    QWidget()
+    QWidget(parent)
   , m_cbVisible(new QCheckBox(this))
-  , m_leName(new QLineEdit(this))
+  , m_pbClone(new QPushButton(this))
   , m_pbDelete(new QPushButton(this))
+  , m_leName(new QLineEdit(this))
   , m_leNodePosition(new QLineEdit(this))
   , m_key(key)
 {
-    auto layout = new QVBoxLayout;
+    QVBoxLayout* layout = new QVBoxLayout;
+    layout->setSizeConstraint(QLayout::SetMinimumSize);
+    layout->setContentsMargins(0,0,0,0);
+    layout->setSpacing(0);
 
-    layout->addWidget(m_cbVisible);
+    QWidget* wTop = new QWidget;
+    wTop->setLayout(new QHBoxLayout);
+
+    wTop->layout()->setSizeConstraint(QLayout::SetMinimumSize);
+    wTop->layout()->setContentsMargins(0,0,0,0);
+    wTop->layout()->setSpacing(0);
+
+    wTop->layout()->addWidget(m_cbVisible);
+    wTop->layout()->addWidget(m_pbClone);
+    wTop->layout()->addWidget(m_pbDelete);
+
+    layout->addWidget(wTop);
     layout->addWidget(m_leName);
-    layout->addWidget(m_pbDelete);
     layout->addWidget(m_leNodePosition);
 
     setLayout(layout);
 
     m_leName->setText(key);
     m_leName->setReadOnly(true);
-    m_cbVisible->setText("visible");
+    m_cbVisible->setText("Visible");
+    m_pbClone->setText("Clone");
+    m_pbDelete->setText("Delete");
     m_cbVisible->setChecked(true);
-    m_pbDelete->setText("del");
     m_leNodePosition->setText("0,0");
 
     connect(m_pbDelete, &QPushButton::clicked, [this]() {
@@ -73,10 +88,18 @@ NodeItemWidget::NodeItemWidget(const QString& key)
         }
     });
 
+//    setStyleSheet("background: green;");
+//    wTop->setStyleSheet("background: red;");
 }
 
 NodeItemWidget::~NodeItemWidget()
 {
+}
+
+void NodeItemWidget::setNodePosition(int x, int y)
+{
+    QString text = QString("%1,%2").arg(QString::number(x)).arg(QString::number(y));
+    m_leNodePosition->setText(text);
 }
 
 }
