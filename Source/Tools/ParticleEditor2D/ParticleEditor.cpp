@@ -38,6 +38,8 @@
 #include <Urho3D/Graphics/Octree.h>
 #include <Urho3D/Urho2D/ParticleEffect2D.h>
 #include <Urho3D/Urho2D/ParticleEmitter2D.h>
+#include <Urho3D/Urho2D/StaticSprite2D.h>
+#include <Urho3D/Urho2D/Sprite2D.h>
 #include <Urho3D/Core/ProcessUtils.h>
 #include <Urho3D/Graphics/Renderer.h>
 #include <Urho3D/Resource/ResourceCache.h>
@@ -113,6 +115,19 @@ void ParticleEditor::CreateParticles()
     }
 }
 
+bool ParticleEditor::select(const String& key)
+{
+    auto it = particleNodes_.find(key);
+    if (it != particleNodes_.end()) {
+        selectedKey_ = key;
+        selectedParticleNode_ = it->second;
+        selectedEffectNode_->SetEnabled(true);
+        selectedAnimation_.start();
+        return true;
+    }
+    return false;
+}
+
 bool ParticleEditor::SetVisible(const String& key, bool visible)
 {
     auto it = particleNodes_.find(key);
@@ -164,10 +179,8 @@ bool ParticleEditor::AddParticleNode(const String& fileName)
 
     particleNodes_.insert(std::make_pair(fileName, node));
 
-    // cache active
-    if (!particleNode_) {
-        particleNode_ = node;
-        fileName_ = fileName;
+    if (!selectedParticleNode_) {
+        select(fileName);
     }
     QString key(fileName.CString());
     emit NewParticleNodeAdded(key);
@@ -232,7 +245,7 @@ void ParticleEditor::Save(const String& fileName)
 
     particleEffect->Save(file);
 
-    fileName_ = fileName;
+//    fileName_ = fileName;
 }
 
 Camera* ParticleEditor::GetCamera() const
@@ -252,7 +265,7 @@ ParticleEffect2D* ParticleEditor::GetEffect() const
 
 ParticleEmitter2D* ParticleEditor::GetEmitter() const
 {
-    return particleNode_->GetComponent<ParticleEmitter2D>();
+    return selectedParticleNode_->GetComponent<ParticleEmitter2D>();
 }
 
 
@@ -265,6 +278,17 @@ void ParticleEditor::OnTimeout()
 {
     if (engine_ && !engine_->IsExiting())
         engine_->RunFrame();
+
+    // animation to point currently selected particle node
+    if (selectedParticleNode_ && selectedAnimation_.isActive()) {
+        selectedEffectNode_->SetPosition(selectedParticleNode_->GetPosition());
+        selectedAnimation_.update();
+        float scale = selectedAnimation_.current();
+        selectedEffectNode_->SetScale(scale);
+        if (scale < 0.05f) {
+            selectedEffectNode_->SetEnabled(false);
+        }
+    }
 }
 
 void ParticleEditor::CreateScene()
@@ -285,6 +309,15 @@ void ParticleEditor::CreateScene()
 
     Renderer* renderer = GetSubsystem<Renderer>();
     renderer->SetViewport(0, viewport);
+
+    // selection effect
+    selectedEffectNode_ = SharedPtr<Node>(scene_->CreateChild("Cursor"));
+    StaticSprite2D* sprite = selectedEffectNode_->CreateComponent<StaticSprite2D>();
+    sprite->SetLayer(99);
+    sprite->SetColor(Color(1.0f, 1.0f, 1.0f, 0.5f));
+    ResourceCache* cache = GetSubsystem<ResourceCache>();
+    sprite->SetSprite(cache->GetResource<Sprite2D>("Urho2D/cursor.png"));
+    selectedEffectNode_->SetEnabled(false);
 }
 
 void ParticleEditor::CreateConsole()
@@ -318,7 +351,7 @@ void ParticleEditor::HandleUpdate(StringHash eventType, VariantMap& eventData)
     Input* input = GetSubsystem<Input>();
 
     // When left button is down, move mouse to particle node
-    if (input->GetMouseButtonDown(MOUSEB_LEFT) && particleNode_)
+    if (input->GetMouseButtonDown(MOUSEB_LEFT) && selectedParticleNode_)
     {
         IntVector2 mousePosition = input->GetMousePosition();
 
@@ -327,7 +360,7 @@ void ParticleEditor::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
         Camera* camera = cameraNode_->GetComponent<Camera>();
         Vector3 worldPoint = camera->ScreenToWorldPoint(screenPoint);
-        particleNode_->SetPosition(worldPoint);
+        selectedParticleNode_->SetPosition(worldPoint);
     }
 }
 
@@ -383,7 +416,9 @@ bool ParticleEditor::renameFile(const QString& fromKey, const QString& toKey) co
     QString absPathTo( absolutePathFrom(toKey) );
 
     if (QFile(absPathTo).exists()) {
+        QString msg("file %1 already exists, will be backup as %2");
         QString backup = freeBackupPath(absPathTo, QString(".pex"));
+        showInfoMessageBox(msg.arg(absPathTo).arg(backup));
         QFile::rename(absPathTo, backup);
     }
     return QFile::rename(absPathFrom, absPathTo);

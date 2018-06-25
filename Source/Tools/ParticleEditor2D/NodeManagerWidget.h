@@ -47,9 +47,10 @@ public:
 
 signals:
     void visibleChanged(const QString&, bool);
-    void deleteRequested(const QString&);
+    void deleteRequested(QString);
     void nodePositionChanged(const QString&, int, int);
     void acceptKeyChangeRequest(QString, QString);
+    void selected(const QString&);
 
 private:
     QPushButton* m_pbToggleGrid = nullptr;

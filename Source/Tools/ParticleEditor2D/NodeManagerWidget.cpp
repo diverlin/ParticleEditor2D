@@ -81,7 +81,18 @@ void NodeManagerWidget::add(NodeItemWidget* item)
     connect(item, &NodeItemWidget::visibleChanged, this, [this](const QString& key, bool visible){
         emit visibleChanged(key, visible);
     });
-    connect(item, &NodeItemWidget::deleteRequested, this, [this](const QString& key){
+    connect(item, &NodeItemWidget::selected, this, [this](const QString& key){
+        emit selected(key);
+        for (auto it: m_widgets) {
+            auto w = it.second;
+            if (w->key() == key) {
+                w->select();
+            } else {
+                w->deselect();
+            }
+        }
+    });
+    connect(item, &NodeItemWidget::deleteRequested, this, [this](QString key){
         assert(remove(key));
         emit deleteRequested(key);
     });
@@ -137,10 +148,10 @@ bool NodeManagerWidget::changeKey(const QString& fromKey, const QString& toKey)
 
 bool NodeManagerWidget::remove(const QString& key)
 {
-    NodeItemWidget* item = itemWidget(key);
-    if (item) {
-        layout()->removeWidget(item);
-        delete item;
+    NodeItemWidget* widget = takeItemWidget(key);
+    if (widget) {
+        layout()->removeWidget(widget);
+        delete widget;
         return true;
     } else {
         return false;

@@ -40,6 +40,7 @@ NodeItemWidget::NodeItemWidget(QWidget* parent, const QString& key)
     :
     QWidget(parent)
   , m_cbVisible(new QCheckBox(this))
+  , m_pbSelect(new QPushButton(this))
   , m_pbClone(new QPushButton(this))
   , m_pbDelete(new QPushButton(this))
   , m_leName(new QLineEdit(this))
@@ -52,15 +53,17 @@ NodeItemWidget::NodeItemWidget(QWidget* parent, const QString& key)
     layout->setSpacing(0);
 
     QWidget* wTop = new QWidget;
-    wTop->setLayout(new QHBoxLayout);
+    QGridLayout* wTopLayout = new QGridLayout;
+    wTop->setLayout(wTopLayout);
 
-    wTop->layout()->setSizeConstraint(QLayout::SetMinimumSize);
-    wTop->layout()->setContentsMargins(0,0,0,0);
-    wTop->layout()->setSpacing(0);
+    wTopLayout->setSizeConstraint(QLayout::SetMinimumSize);
+    wTopLayout->setContentsMargins(0,0,0,0);
+    wTopLayout->setSpacing(0);
 
-    wTop->layout()->addWidget(m_cbVisible);
-    wTop->layout()->addWidget(m_pbClone);
-    wTop->layout()->addWidget(m_pbDelete);
+    wTopLayout->addWidget(m_cbVisible, 0, 0);
+    wTopLayout->addWidget(m_pbSelect, 0, 1);
+    wTopLayout->addWidget(m_pbClone, 1, 0);
+    wTopLayout->addWidget(m_pbDelete, 1, 1);
 
     layout->addWidget(wTop);
     layout->addWidget(m_leName);
@@ -70,16 +73,20 @@ NodeItemWidget::NodeItemWidget(QWidget* parent, const QString& key)
 
     m_leName->setText(key);
     m_cbVisible->setText("Visible");
+    m_pbSelect->setText("Select");
     m_pbClone->setText("Clone");
     m_pbDelete->setText("Delete");
     m_cbVisible->setChecked(true);
     m_leNodePosition->setText("0,0");
 
-    connect(m_pbDelete, &QPushButton::clicked, [this]() {
-        emit deleteRequested(m_key);
-    });
     connect(m_cbVisible, &QPushButton::toggled, [this](bool checked) {
         emit visibleChanged(m_key, checked);
+    });
+    connect(m_pbSelect, &QPushButton::clicked, [this]() {
+        emit selected(m_key);
+    });
+    connect(m_pbDelete, &QPushButton::clicked, [this]() {
+        emit deleteRequested(m_key);
     });
     connect(m_leName, &QLineEdit::returnPressed, this, [this]() {
         QString newKeyCandidate = m_leName->text();
@@ -103,6 +110,24 @@ NodeItemWidget::NodeItemWidget(QWidget* parent, const QString& key)
 
 NodeItemWidget::~NodeItemWidget()
 {
+}
+
+void NodeItemWidget::mousePressEvent(QMouseEvent* event)
+{
+    emit selected(m_key);
+    QWidget::mousePressEvent(event);
+}
+
+void NodeItemWidget::select()
+{
+    setStyleSheet("background: rgba(0,1,0,0.2);");
+    m_isSelected = true;
+}
+
+void NodeItemWidget::deselect()
+{
+    setStyleSheet("");
+    m_isSelected = false;
 }
 
 void NodeItemWidget::setNodePosition(int x, int y)
