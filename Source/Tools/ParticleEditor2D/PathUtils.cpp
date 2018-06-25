@@ -20,45 +20,36 @@
 // THE SOFTWARE.
 //
 
-#pragma once
+#include "PathUtils.h"
 
-#include <Urho3D/Core/Object.h>
+#include <QApplication>
+#include <QFile>
 
-namespace Urho3D
+QString absolutePathFrom(QString path)
 {
-class ParticleEffect2D;
-class ParticleEmitter2D;
+    QString workdir = qApp->applicationDirPath();
+    if(!path.startsWith(workdir)) {
+        path = workdir + "/" + path;
+    }
+    return path;
+}
 
-/// Particle effect editor interface.
-class ParticleEffectEditor : public Object
+QString relativePathFrom(QString path)
 {
-    URHO3D_OBJECT(ParticleEffectEditor, Object)
+    path.replace(qApp->applicationDirPath(), "");
+    if (path.startsWith("/")) {
+        path.remove(0, 1);
+    }
+    return path;
+}
 
-public:
-    ParticleEffectEditor(Context* context);
-    virtual ~ParticleEffectEditor();
-
-    void SetSelectedKey(String key) { selectedKey_ = key; }
-    const String& GetSelectedKey() const { return selectedKey_; }
-
-    /// Update widget.
-    void UpdateWidget();
-
-protected:
-    /// Handle update widget.
-    virtual void HandleUpdateWidget() = 0;
-
-    /// Return particle effect.
-    ParticleEffect2D* GetEffect(const String&) const;
-    /// Return particle emitter.
-    ParticleEmitter2D* GetEmitter(const String&) const;
-
-    /// Is updating widget.
-    bool updatingWidget_;
-
-private:
-    /// Key of selected particle node
-    String selectedKey_;
-};
-
+QString freeBackupPath(QString path, QString ext) {
+    if (QFile(path).exists()) {
+        path.replace(ext, "");
+        path += ".backup";
+        path += ext;
+        return freeBackupPath(path, ext);
+    } else {
+        return path;
+    }
 }

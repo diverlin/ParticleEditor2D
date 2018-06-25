@@ -41,6 +41,11 @@ public:
 
     NodeItemWidget* itemWidget(const QString&) const;
 
+    bool hasUnsaved() const;
+    QList<QString> getDirtyKeys() const;
+
+    void unmarkDirty(QString key);
+    void markDirty(QString key);
     void add(NodeItemWidget*);
     bool remove(const QString&);
     bool changeKey(const QString&, const QString&);
@@ -51,9 +56,12 @@ signals:
     void nodePositionChanged(const QString&, int, int);
     void acceptKeyChangeRequest(QString, QString);
     void selected(const QString&);
+    void saveAllRequested();
+    void saveRequested(const QString&);
 
 private:
     QPushButton* m_pbToggleGrid = nullptr;
+    QPushButton* m_pbSaveAll = nullptr;
     QSpacerItem* m_horizontalSpacer = nullptr;
     std::map<QString, NodeItemWidget*> m_widgets;
 

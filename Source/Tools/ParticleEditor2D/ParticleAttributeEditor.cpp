@@ -24,7 +24,9 @@
 #include "ParticleAttributeEditor.h"
 #include <Urho3D/Urho2D/ParticleEffect2D.h>
 #include "ValueVarianceEditor.h"
+
 #include <QVBoxLayout>
+#include <QDebug>
 
 namespace Urho3D
 {
@@ -59,7 +61,11 @@ void ParticleAttributeEditor::HanldeValueVarianceEditorValueChanged(float averag
     if (updatingWidget_)
         return;
 
-    ParticleEffect2D* effect = GetEffect();
+    ParticleEffect2D* effect = GetEffect( GetSelectedKey() );
+    if (!effect) {
+        return;
+    }
+
     QObject* s = sender();
     if (s == particleLifeSpanEditor_)
     {
@@ -86,13 +92,17 @@ void ParticleAttributeEditor::HanldeValueVarianceEditorValueChanged(float averag
         effect->SetRotationEnd(average);
         effect->SetRotationEndVariance(variance);
     }
+
+    emit changed( GetSelectedKey().CString() );
 }
 
 
 void ParticleAttributeEditor::HandleUpdateWidget()
 {
-    ParticleEffect2D* effect = GetEffect();
-
+    ParticleEffect2D* effect = GetEffect( GetSelectedKey() );
+    if (!effect) {
+        return;
+    }
     particleLifeSpanEditor_->setValue(effect->GetParticleLifeSpan(), effect->GetParticleLifespanVariance());
 
     startSizeEditor_->setValue(effect->GetStartParticleSize(), effect->GetStartParticleSizeVariance());
@@ -124,9 +134,16 @@ void ParticleAttributeEditor::HandleStartColorEditorValueChanged(const Color& av
 {
     if (updatingWidget_)
         return;
-    ParticleEffect2D* effect = GetEffect();
+
+    ParticleEffect2D* effect = GetEffect( GetSelectedKey() );
+    if (!effect) {
+        return;
+    }
+
     effect->SetStartColor(average);
     effect->SetStartColorVariance(variance);
+
+    emit changed( GetSelectedKey().CString() );
 }
 
 void ParticleAttributeEditor::HandleFinishColorEditorValueChanged(const Color& average, const Color& variance)
@@ -134,8 +151,15 @@ void ParticleAttributeEditor::HandleFinishColorEditorValueChanged(const Color& a
     if (updatingWidget_)
         return;
 
-    ParticleEffect2D* effect_ = GetEffect();
-    effect_->SetFinishColor(average);
-    effect_->SetFinishColorVariance(variance);
+    ParticleEffect2D* effect = GetEffect( GetSelectedKey() );
+    if (!effect) {
+        return;
+    }
+
+    effect->SetFinishColor(average);
+    effect->SetFinishColorVariance(variance);
+
+    emit changed( GetSelectedKey().CString() );
 }
-}
+
+} // namespace Urho3D

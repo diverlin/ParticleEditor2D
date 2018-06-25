@@ -45,8 +45,13 @@ public:
     void rejectNewKeyCandidate();
     void acceptNewKeyCandidate();
 
-    void select();
-    void deselect();
+    bool isDirty() const { return m_isDirty; }
+
+    void markDirty() { m_isDirty = true; updateBackground(); }
+    void unmarkDirty() { m_isDirty = false; updateBackground(); }
+
+    void select() { m_isSelected = true; updateBackground(); }
+    void deselect() { m_isSelected = false; updateBackground(); }
 
 signals:
     void selected(const QString&);
@@ -54,19 +59,24 @@ signals:
     void deleteRequested(QString);
     void nodePositionChanged(const QString&, int x, int y);
     void changeKeyRequest(QString, QString);
+    void saveRequested(const QString&);
 
 protected:
     void mousePressEvent(QMouseEvent*) override final;
 
 private:
+    bool m_isDirty = false;
     bool m_isSelected = false;
     QString m_key;
     QCheckBox* m_cbVisible = nullptr;
     QPushButton* m_pbSelect = nullptr;
+    QPushButton* m_pbSave = nullptr;
     QPushButton* m_pbClone = nullptr;
     QPushButton* m_pbDelete = nullptr;
     QLineEdit* m_leName = nullptr;
     QLineEdit* m_leNodePosition = nullptr;
+
+    void updateBackground();
 };
 
 } // namespace Urho3D

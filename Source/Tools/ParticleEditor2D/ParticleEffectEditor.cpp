@@ -48,14 +48,14 @@ void ParticleEffectEditor::UpdateWidget()
     updatingWidget_ = false;
 }
 
-ParticleEffect2D* ParticleEffectEditor::GetEffect() const
+ParticleEffect2D* ParticleEffectEditor::GetEffect(const String& key) const
 {
-    return ParticleEditor::Get()->GetEffect();
+    return ParticleEditor::Get()->GetEffect(key);
 }
 
-ParticleEmitter2D* ParticleEffectEditor::GetEmitter() const
+ParticleEmitter2D* ParticleEffectEditor::GetEmitter(const String& key) const
 {
-    return ParticleEditor::Get()->GetEmitter();
+    return ParticleEditor::Get()->GetEmitter(key);
 }
 
 }

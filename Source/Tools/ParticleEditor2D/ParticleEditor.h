@@ -89,7 +89,7 @@ public:
     bool SetParticleNodePosition(const String& key, int x, int y);
 
     bool Open(QString fileName);
-    void Save(const String& fileName);
+    bool Save(const String& fileName);
     bool changeKey(const String& fromKey, const String& toKey);
     bool select(const String& key);
 
@@ -97,9 +97,9 @@ public:
     /// Return camera.
     Camera* GetCamera() const;
     /// Return effect.
-    ParticleEffect2D* GetEffect() const;
+    ParticleEffect2D* GetEffect(const String&) const;
     /// Return emitter.
-    ParticleEmitter2D* GetEmitter() const;
+    ParticleEmitter2D* GetEmitter(const String&) const;
 
     /// Return editor pointer.
     static ParticleEditor* Get();
@@ -148,13 +148,8 @@ private:
 
     void CreateParticles();
 
-    QString absolutePathFrom(QString path) const;
-    QString relativePathFrom(QString path) const;
-
     bool isFileAlreadyOpened(const QString& key) const;
     bool renameFile(const QString& fromKey, const QString& toKey) const;
 };
-
-QString freeBackupPath(QString path, QString ext);
 
 } // namespace Urho3D

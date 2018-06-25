@@ -65,6 +65,8 @@ private:
     void CreateToolBar();
     /// Create dock widgets.
     void CreateDockWidgets();
+    /// change active particle emmiter
+    void SetSelectedKey(String key);
 
 private slots:
     /// Handle new action.
@@ -111,8 +113,14 @@ private:
     ParticleAttributeEditor* particleAttributeEditor_;
 
     NodeManagerWidget* nodeManagerWidget_ = nullptr;
+
+    bool checkClosePermition() const;
+
+protected:
+    void closeEvent(QCloseEvent*) override final;
 };
 
-void showInfoMessageBox(const QString&);
+int showInfoMessageBox(const QString&);
+int showQuestionMessageBox(const QString&);
 
 } // namespace Urho3D

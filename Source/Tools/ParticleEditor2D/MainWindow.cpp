@@ -26,6 +26,7 @@
 #include "ParticleEditor.h"
 #include "NodeManagerWidget.h"
 #include "NodeItemWidget.h"
+#include "PathUtils.h"
 
 #include <Urho3D/Graphics/Camera.h>
 #include <Urho3D/Core/Context.h>
@@ -50,8 +51,8 @@ namespace Urho3D
 MainWindow::MainWindow(Context* context) :
     QMainWindow(0, 0),
     ParticleEffectEditor(context),
-    emitterAttributeEditor_(0),
-    particleAttributeEditor_(0)
+    emitterAttributeEditor_(nullptr),
+    particleAttributeEditor_(nullptr)
 {
     setWindowIcon(QIcon(":/Images/Icon.png"));
 
@@ -101,7 +102,11 @@ void MainWindow::CreateActions()
 
     exitAction_ = new QAction(tr("Exit"), this);
     exitAction_->setShortcut(QKeySequence::fromString("Alt+F4"));
-    connect(exitAction_, SIGNAL(triggered(bool)), this, SLOT(close()));
+    connect(exitAction_, &QAction::triggered, this, [this](bool){
+        if (checkClosePermition()) {
+            close();
+        }
+    });
 
     zoomInAction_ = new QAction(QIcon(":/Images/ZoomIn.png"), tr("Zoom In"), this);
     zoomInAction_->setShortcut(QKeySequence::fromString("Ctrl++"));
@@ -118,6 +123,24 @@ void MainWindow::CreateActions()
     backgroundAction_ = new QAction(tr("Background"), this);
     backgroundAction_->setShortcut(QKeySequence::fromString("Ctrl+B"));
     connect(backgroundAction_, SIGNAL(triggered(bool)), this, SLOT(HandleBackgroundAction()));
+}
+
+bool MainWindow::checkClosePermition() const {
+    if (nodeManagerWidget_->hasUnsaved()) {
+        if (QMessageBox::Ok != showQuestionMessageBox("There are some unsaved configurations. Still want to exit and lost data?")) {
+            return false;
+        }
+    }
+    return true;
+}
+
+void MainWindow::closeEvent(QCloseEvent* event) {
+
+    if (!checkClosePermition()) {
+        event->ignore();
+    } else {
+        event->accept();
+    }
 }
 
 static QAction* CreateAction(QActionGroup* group, const QString& iconFileName, const QString& text, bool checked, const QString& shortcut = "")
@@ -194,12 +217,30 @@ void MainWindow::CreateDockWidgets()
     connect(nodeManagerWidget_, &NodeManagerWidget::acceptKeyChangeRequest, this, [this](QString key, QString newKey) {
         assert(ParticleEditor::Get()->changeKey(String(key.toStdString().c_str()), String(newKey.toStdString().c_str())));
     });
-    connect(nodeManagerWidget_, &NodeManagerWidget::selected, this, [this](const QString& key) {
-        assert(ParticleEditor::Get()->select(String(key.toStdString().c_str())));
+    connect(nodeManagerWidget_, &NodeManagerWidget::selected, this, [this](QString key) {
+        String key_(key.toStdString().c_str());
+        assert(ParticleEditor::Get()->select(key_));
+        SetSelectedKey(key_);
         HandleUpdateWidget();
+    });
+    connect(nodeManagerWidget_, &NodeManagerWidget::saveAllRequested, this, [this]() {
+        QList<QString> keys = nodeManagerWidget_->getDirtyKeys();
+        for (QString key: keys) {
+            if (ParticleEditor::Get()->Save(String(key.toStdString().c_str()))) {
+                nodeManagerWidget_->unmarkDirty(key);
+            }
+        }
+    });
+    connect(nodeManagerWidget_, &NodeManagerWidget::saveRequested, this, [this](const QString& key) {
+        if (ParticleEditor::Get()->Save(String(key.toStdString().c_str()))) {
+            nodeManagerWidget_->unmarkDirty(key);
+        }
     });
 
     emitterAttributeEditor_ = new EmitterAttributeEditor(context_);
+    connect(emitterAttributeEditor_, &EmitterAttributeEditor::changed, this, [this](QString key) {
+        nodeManagerWidget_->markDirty(key);
+    });
 
     QDockWidget* eaDockWidget = new QDockWidget(tr("Emitter Attributes"));
     addDockWidget(Qt::LeftDockWidgetArea, eaDockWidget);
@@ -212,6 +253,9 @@ void MainWindow::CreateDockWidgets()
     eaToggleViewAction->setShortcut(QKeySequence::fromString("Ctrl+E"));
 
     particleAttributeEditor_ = new ParticleAttributeEditor(context_);
+    connect(particleAttributeEditor_, &ParticleAttributeEditor::changed, this, [this](QString key) {
+        nodeManagerWidget_->markDirty(key);
+    });
 
     QDockWidget* paDockWidget = new QDockWidget(tr("Particle Attributes"));
     addDockWidget(Qt::RightDockWidgetArea, paDockWidget);
@@ -220,6 +264,15 @@ void MainWindow::CreateDockWidgets()
     QAction* paToggleViewAction = paDockWidget->toggleViewAction();
     viewMenu_->addAction(paToggleViewAction);
     paToggleViewAction->setShortcut(QKeySequence::fromString("Ctrl+P"));
+}
+
+void MainWindow::SetSelectedKey(String key)
+{
+    ParticleEffectEditor::SetSelectedKey(key);
+    if (emitterAttributeEditor_)
+        emitterAttributeEditor_->SetSelectedKey(key);
+    if (particleAttributeEditor_)
+        particleAttributeEditor_->SetSelectedKey(key);
 }
 
 void MainWindow::HandleNewAction()
@@ -279,13 +332,22 @@ void MainWindow::HandleBackgroundAction()
     renderer->GetDefaultZone()->SetFogColor(newColor);
 }
 
-void showInfoMessageBox(const QString& msg)
+int showInfoMessageBox(const QString& msg)
 {
     QMessageBox msgBox;
     msgBox.setText(msg);
     msgBox.setStandardButtons(QMessageBox::Ok);
     msgBox.setDefaultButton(QMessageBox::Ok);
-    msgBox.exec();
+    return msgBox.exec();
+}
+
+int showQuestionMessageBox(const QString& msg)
+{
+    QMessageBox msgBox;
+    msgBox.setText(msg);
+    msgBox.setStandardButtons(QMessageBox::Ok|QMessageBox::Cancel);
+    msgBox.setDefaultButton(QMessageBox::Cancel);
+    return msgBox.exec();
 }
 
 } // namespace Urho3D

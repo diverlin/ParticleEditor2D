@@ -39,6 +39,9 @@ public:
     ParticleAttributeEditor(Context* context);
     virtual ~ParticleAttributeEditor();
 
+signals:
+    void changed(QString);
+
 private slots:
     void HanldeValueVarianceEditorValueChanged(float average, float variance);
     void HandleStartColorEditorValueChanged(const Color& average, const Color& variance);

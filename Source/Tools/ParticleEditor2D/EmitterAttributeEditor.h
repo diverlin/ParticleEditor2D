@@ -45,6 +45,9 @@ public:
     EmitterAttributeEditor(Context* context);
     virtual ~EmitterAttributeEditor();
 
+signals:
+    void changed(QString);
+
 private slots:
     void HandleMaxParticlesEditorValueChanged(int value);
     void HandleDurationEditorValueChanged(float value);    
