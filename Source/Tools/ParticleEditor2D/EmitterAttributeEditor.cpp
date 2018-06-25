@@ -88,7 +88,7 @@ void EmitterAttributeEditor::HandleDurationEditorValueChanged(float value)
     if (updatingWidget_)
         return;
 
-    GetEffect()->SetDuration(value);
+    GetEffect( GetSelectedKey() )->SetDuration(value);
 }
 
 void EmitterAttributeEditor::HandleTexturePushButtonClicked()
@@ -110,8 +110,8 @@ void EmitterAttributeEditor::HandleTexturePushButtonClicked()
 
     textureEditor_->setText(fileName);
 
-    GetEffect()->SetSprite(sprite);
-    GetEmitter()->SetSprite(sprite);
+    GetEffect( GetSelectedKey() )->SetSprite(sprite);
+    GetEmitter( GetSelectedKey() )->SetSprite(sprite);
 }
 
 void EmitterAttributeEditor::HandleBlendModeEditorChanged(int index)
@@ -119,8 +119,8 @@ void EmitterAttributeEditor::HandleBlendModeEditorChanged(int index)
     if (updatingWidget_)
         return;
 
-    GetEffect()->SetBlendMode((BlendMode)index);
-    GetEmitter()->SetBlendMode((BlendMode)index);
+    GetEffect( GetSelectedKey() )->SetBlendMode((BlendMode)index);
+    GetEmitter( GetSelectedKey() )->SetBlendMode((BlendMode)index);
 }
 
 void EmitterAttributeEditor::HandleEmitterTypeEditorChanged(int index)
@@ -132,7 +132,7 @@ void EmitterAttributeEditor::HandleEmitterTypeEditorChanged(int index)
     if (updatingWidget_)
         return;
 
-    GetEffect()->SetEmitterType(emitterType);
+    GetEffect( GetSelectedKey() )->SetEmitterType(emitterType);
 }
 
 void EmitterAttributeEditor::HandleSourcePositionVarianceEditorValueChanged(const Vector2& value)
@@ -140,7 +140,7 @@ void EmitterAttributeEditor::HandleSourcePositionVarianceEditorValueChanged(cons
     if (updatingWidget_)
         return;
 
-    GetEffect()->SetSourcePositionVariance(value);
+    GetEffect( GetSelectedKey() )->SetSourcePositionVariance(value);
 }
 
 void EmitterAttributeEditor::HandleGravityEditorValueChanged(const Vector2& value)
@@ -148,7 +148,7 @@ void EmitterAttributeEditor::HandleGravityEditorValueChanged(const Vector2& valu
     if (updatingWidget_)
         return;
 
-    GetEffect()->SetGravity(value);
+    GetEffect( GetSelectedKey() )->SetGravity(value);
 }
 
 void EmitterAttributeEditor::HandleValueVarianceEditorValueChanged(float average, float variance)
@@ -157,7 +157,7 @@ void EmitterAttributeEditor::HandleValueVarianceEditorValueChanged(float average
         return;
 
     QObject* s = sender();
-    ParticleEffect2D* effect = GetEffect();
+    ParticleEffect2D* effect = GetEffect( GetSelectedKey() );
 
     if (s == speedEditor_)
     {
@@ -200,7 +200,10 @@ void EmitterAttributeEditor::HandleValueVarianceEditorValueChanged(float average
 
 void EmitterAttributeEditor::HandleUpdateWidget()
 {
-    ParticleEffect2D* effect_ = GetEffect();
+    ParticleEffect2D* effect_ = GetEffect( GetSelectedKey() );
+    if (!effect_) {
+        return;
+    }
 
     maxParticlesEditor_->setValue(effect_->GetMaxParticles());
     durationEditor_->setValue(effect_->GetDuration());
@@ -365,8 +368,8 @@ void EmitterAttributeEditor::HandlePostUpdate(StringHash eventType, VariantMap& 
 
     maxParticlesChanged_ = false;
 
-    GetEffect()->SetMaxParticles(maxParticlesEditor_->value());
-    GetEmitter()->SetMaxParticles(maxParticlesEditor_->value());
+    GetEffect( GetSelectedKey() )->SetMaxParticles(maxParticlesEditor_->value());
+    GetEmitter( GetSelectedKey() )->SetMaxParticles(maxParticlesEditor_->value());
 }
 
 }

@@ -26,6 +26,7 @@
 #include "ParticleEditor.h"
 #include "NodeManagerWidget.h"
 #include "NodeItemWidget.h"
+#include "PathUtils.h"
 
 #include <Urho3D/Graphics/Camera.h>
 #include <Urho3D/Core/Context.h>
@@ -194,8 +195,10 @@ void MainWindow::CreateDockWidgets()
     connect(nodeManagerWidget_, &NodeManagerWidget::acceptKeyChangeRequest, this, [this](QString key, QString newKey) {
         assert(ParticleEditor::Get()->changeKey(String(key.toStdString().c_str()), String(newKey.toStdString().c_str())));
     });
-    connect(nodeManagerWidget_, &NodeManagerWidget::selected, this, [this](const QString& key) {
-        assert(ParticleEditor::Get()->select(String(key.toStdString().c_str())));
+    connect(nodeManagerWidget_, &NodeManagerWidget::selected, this, [this](QString key) {
+        String key_(key.toStdString().c_str());
+        assert(ParticleEditor::Get()->select(key_));
+        SetSelectedKey(key_);
         HandleUpdateWidget();
     });
     connect(nodeManagerWidget_, &NodeManagerWidget::saveAllRequested, this, [this]() {
@@ -226,6 +229,15 @@ void MainWindow::CreateDockWidgets()
     QAction* paToggleViewAction = paDockWidget->toggleViewAction();
     viewMenu_->addAction(paToggleViewAction);
     paToggleViewAction->setShortcut(QKeySequence::fromString("Ctrl+P"));
+}
+
+void MainWindow::SetSelectedKey(String key)
+{
+    ParticleEffectEditor::SetSelectedKey(key);
+    if (emitterAttributeEditor_)
+        emitterAttributeEditor_->SetSelectedKey(key);
+    if (particleAttributeEditor_)
+        particleAttributeEditor_->SetSelectedKey(key);
 }
 
 void MainWindow::HandleNewAction()

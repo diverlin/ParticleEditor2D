@@ -65,6 +65,8 @@ private:
     void CreateToolBar();
     /// Create dock widgets.
     void CreateDockWidgets();
+    /// change active particle emmiter
+    void SetSelectedKey(String key);
 
 private slots:
     /// Handle new action.

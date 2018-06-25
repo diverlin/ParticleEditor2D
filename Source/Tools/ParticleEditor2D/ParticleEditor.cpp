@@ -22,6 +22,7 @@
 
 #include "ParticleEditor.h"
 #include "MainWindow.h"
+#include "PathUtils.h"
 
 #include <Urho3D/Graphics/Camera.h>
 #include <Urho3D/Engine/Console.h>
@@ -179,30 +180,9 @@ bool ParticleEditor::AddParticleNode(const String& fileName)
 
     particleNodes_.insert(std::make_pair(fileName, node));
 
-    if (!selectedParticleNode_) {
-        select(fileName);
-    }
     QString key(fileName.CString());
     emit NewParticleNodeAdded(key);
     return true;
-}
-
-QString ParticleEditor::absolutePathFrom(QString path) const
-{
-    QString workdir = qApp->applicationDirPath();
-    if(!path.startsWith(workdir)) {
-        path = workdir + "/" + path;
-    }
-    return path;
-}
-
-QString ParticleEditor::relativePathFrom(QString path) const
-{
-    path.replace(qApp->applicationDirPath(), "");
-    if (path.startsWith("/")) {
-        path.remove(0, 1);
-    }
-    return path;
 }
 
 bool ParticleEditor::isFileAlreadyOpened(const QString& key) const
@@ -232,7 +212,7 @@ bool ParticleEditor::Open(QString filepath)
 }
 
 
-void ParticleEditor::SaveALl()
+void ParticleEditor::SaveAll()
 {
     for (auto it: particleNodes_) {
         Save(it.first);
@@ -241,13 +221,18 @@ void ParticleEditor::SaveALl()
 
 void ParticleEditor::Save(const String& fileName)
 {
-    ParticleEffect2D* particleEffect = GetEffect();
+    QString abs_filepath = absolutePathFrom(fileName.CString());
+    QString rel_filepath = relativePathFrom(fileName.CString());
+    String key(rel_filepath.toStdString().c_str());
+    String filepath(abs_filepath.toStdString().c_str());
+
+    ParticleEffect2D* particleEffect = GetEffect( key );
     if (!particleEffect)
         return;
 
     File file(context_);
-    if (!file.Open(fileName, FILE_WRITE)) {
-        showInfoMessageBox(QString("Open file with write abilities failed %1").arg(fileName.CString()));
+    if (!file.Open(filepath, FILE_WRITE)) {
+        showInfoMessageBox(QString("Open file with write abilities failed %1").arg(filepath.CString()));
         return;
     }
 
@@ -259,19 +244,24 @@ Camera* ParticleEditor::GetCamera() const
     return cameraNode_->GetComponent<Camera>();
 }
 
-ParticleEffect2D* ParticleEditor::GetEffect() const
+ParticleEffect2D* ParticleEditor::GetEffect(const String& key) const
 {
-    ParticleEmitter2D* emitter = GetEmitter();
+    ParticleEmitter2D* emitter = GetEmitter( key );
     if (!emitter)
-        return 0;
+        return nullptr;
 
     return emitter->GetEffect();
 }
 
 
-ParticleEmitter2D* ParticleEditor::GetEmitter() const
+ParticleEmitter2D* ParticleEditor::GetEmitter(const String& key) const
 {
-    return selectedParticleNode_->GetComponent<ParticleEmitter2D>();
+    auto it = particleNodes_.find(key);
+    if (it != particleNodes_.end()) {
+        const SharedPtr<Node> node = it->second;
+        return node->GetComponent<ParticleEmitter2D>();
+    }
+    return nullptr;
 }
 
 
@@ -428,17 +418,6 @@ bool ParticleEditor::renameFile(const QString& fromKey, const QString& toKey) co
         QFile::rename(absPathTo, backup);
     }
     return QFile::rename(absPathFrom, absPathTo);
-}
-
-QString freeBackupPath(QString path, QString ext) {
-    if (QFile(path).exists()) {
-        path.replace(ext, "");
-        path += ".backup";
-        path += ext;
-        return freeBackupPath(path, ext);
-    } else {
-        return path;
-    }
 }
 
 } // namespace Urho3D

@@ -20,45 +20,9 @@
 // THE SOFTWARE.
 //
 
-#pragma once
+#include <QString>
 
-#include <Urho3D/Core/Object.h>
+QString absolutePathFrom(QString path);
+QString relativePathFrom(QString path);
+QString freeBackupPath(QString path, QString ext);
 
-namespace Urho3D
-{
-class ParticleEffect2D;
-class ParticleEmitter2D;
-
-/// Particle effect editor interface.
-class ParticleEffectEditor : public Object
-{
-    URHO3D_OBJECT(ParticleEffectEditor, Object)
-
-public:
-    ParticleEffectEditor(Context* context);
-    virtual ~ParticleEffectEditor();
-
-    void SetSelectedKey(String key) { selectedKey_ = key; }
-    const String& GetSelectedKey() const { return selectedKey_; }
-
-    /// Update widget.
-    void UpdateWidget();
-
-protected:
-    /// Handle update widget.
-    virtual void HandleUpdateWidget() = 0;
-
-    /// Return particle effect.
-    ParticleEffect2D* GetEffect(const String&) const;
-    /// Return particle emitter.
-    ParticleEmitter2D* GetEmitter(const String&) const;
-
-    /// Is updating widget.
-    bool updatingWidget_;
-
-private:
-    /// Key of selected particle node
-    String selectedKey_;
-};
-
-}
