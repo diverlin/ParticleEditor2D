@@ -28,6 +28,38 @@
 namespace Urho3D
 {
 
+class ScaleDownAnimation {
+public:
+
+    bool isActive() const { return m_isActive; }
+    float current() const { return m_current; }
+
+    void start() {
+        m_isActive = true;
+        m_current = m_top;
+    }
+
+    void update() {
+        if (m_current > m_low) {
+            m_current -= m_step;
+        } else {
+            stop();
+        }
+    }
+
+private:
+    float m_current = 1.0f;
+    float m_low = 0.0f;
+    float m_top = 1.0f;
+    float m_step = 0.01f;
+    bool m_isActive = false;
+
+    void stop() {
+        m_isActive = false;
+        m_current = m_low;
+    }
+};
+
 class Camera;
 class Context;
 class Engine;
@@ -59,8 +91,9 @@ public:
     bool Open(QString fileName);
     void Save(const String& fileName);
     bool changeKey(const String& fromKey, const String& toKey);
+    bool select(const String& key);
 
-    const String& GetFileName() const { return fileName_; }
+    const String& GetFileName() const { return selectedKey_; }
     /// Return camera.
     Camera* GetCamera() const;
     /// Return effect.
@@ -108,10 +141,11 @@ private:
     /// Particle nodes <filename, Node>.
     std::map<String, SharedPtr<Node>> particleNodes_;
 
-    String fileName_; // todo: remove this
-    SharedPtr<Node> particleNode_; // todo: remove this
+    ScaleDownAnimation selectedAnimation_;
+    String selectedKey_;
+    SharedPtr<Node> selectedParticleNode_;
+    SharedPtr<Node> selectedEffectNode_;
 
-//    int selectedParticleNodeId_ = -1;
     void CreateParticles();
 
     QString absolutePathFrom(QString path) const;

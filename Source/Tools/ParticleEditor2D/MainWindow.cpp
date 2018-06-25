@@ -185,7 +185,7 @@ void MainWindow::CreateDockWidgets()
     connect(nodeManagerWidget_, &NodeManagerWidget::visibleChanged, this, [this](const QString& key, bool visible) {
         assert(ParticleEditor::Get()->SetVisible(String(key.toStdString().c_str()), visible));
     });
-    connect(nodeManagerWidget_, &NodeManagerWidget::deleteRequested, this, [this](const QString& key) {
+    connect(nodeManagerWidget_, &NodeManagerWidget::deleteRequested, this, [this](QString key) {
         assert(ParticleEditor::Get()->RemoveParticleNode(String(key.toStdString().c_str())));
     });
     connect(nodeManagerWidget_, &NodeManagerWidget::nodePositionChanged, this, [this](const QString& key, int x, int y) {
@@ -193,6 +193,10 @@ void MainWindow::CreateDockWidgets()
     });
     connect(nodeManagerWidget_, &NodeManagerWidget::acceptKeyChangeRequest, this, [this](QString key, QString newKey) {
         assert(ParticleEditor::Get()->changeKey(String(key.toStdString().c_str()), String(newKey.toStdString().c_str())));
+    });
+    connect(nodeManagerWidget_, &NodeManagerWidget::selected, this, [this](const QString& key) {
+        assert(ParticleEditor::Get()->select(String(key.toStdString().c_str())));
+        HandleUpdateWidget();
     });
 
     emitterAttributeEditor_ = new EmitterAttributeEditor(context_);

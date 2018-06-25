@@ -45,15 +45,24 @@ public:
     void rejectNewKeyCandidate();
     void acceptNewKeyCandidate();
 
+    void select();
+    void deselect();
+
 signals:
+    void selected(const QString&);
     void visibleChanged(const QString&, bool);
-    void deleteRequested(const QString&);
+    void deleteRequested(QString);
     void nodePositionChanged(const QString&, int x, int y);
     void changeKeyRequest(QString, QString);
 
+protected:
+    void mousePressEvent(QMouseEvent*) override final;
+
 private:
+    bool m_isSelected = false;
     QString m_key;
     QCheckBox* m_cbVisible = nullptr;
+    QPushButton* m_pbSelect = nullptr;
     QPushButton* m_pbClone = nullptr;
     QPushButton* m_pbDelete = nullptr;
     QLineEdit* m_leName = nullptr;
