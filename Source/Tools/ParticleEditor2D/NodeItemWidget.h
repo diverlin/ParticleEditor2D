@@ -54,6 +54,7 @@ signals:
     void deleteRequested(QString);
     void nodePositionChanged(const QString&, int x, int y);
     void changeKeyRequest(QString, QString);
+    void saveRequested(const QString&);
 
 protected:
     void mousePressEvent(QMouseEvent*) override final;
@@ -63,6 +64,7 @@ private:
     QString m_key;
     QCheckBox* m_cbVisible = nullptr;
     QPushButton* m_pbSelect = nullptr;
+    QPushButton* m_pbSave = nullptr;
     QPushButton* m_pbClone = nullptr;
     QPushButton* m_pbDelete = nullptr;
     QLineEdit* m_leName = nullptr;

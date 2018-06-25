@@ -198,6 +198,12 @@ void MainWindow::CreateDockWidgets()
         assert(ParticleEditor::Get()->select(String(key.toStdString().c_str())));
         HandleUpdateWidget();
     });
+    connect(nodeManagerWidget_, &NodeManagerWidget::saveAllRequested, this, [this]() {
+        ParticleEditor::Get()->SaveAll();
+    });
+    connect(nodeManagerWidget_, &NodeManagerWidget::saveRequested, this, [this](const QString& key) {
+        ParticleEditor::Get()->Save(String(key.toStdString().c_str()));
+    });
 
     emitterAttributeEditor_ = new EmitterAttributeEditor(context_);
 

@@ -39,10 +39,11 @@ namespace Urho3D
 NodeItemWidget::NodeItemWidget(QWidget* parent, const QString& key)
     :
     QWidget(parent)
-  , m_cbVisible(new QCheckBox(this))
-  , m_pbSelect(new QPushButton(this))
-  , m_pbClone(new QPushButton(this))
-  , m_pbDelete(new QPushButton(this))
+  , m_cbVisible(new QCheckBox(tr("Visible"), this))
+  , m_pbSelect(new QPushButton(tr("Select"), this))
+  , m_pbSave(new QPushButton(tr("Save"), this))
+  , m_pbClone(new QPushButton(tr("Clone"), this))
+  , m_pbDelete(new QPushButton(tr("Delete"), this))
   , m_leName(new QLineEdit(this))
   , m_leNodePosition(new QLineEdit(this))
   , m_key(key)
@@ -62,6 +63,7 @@ NodeItemWidget::NodeItemWidget(QWidget* parent, const QString& key)
 
     wTopLayout->addWidget(m_cbVisible, 0, 0);
     wTopLayout->addWidget(m_pbSelect, 0, 1);
+    wTopLayout->addWidget(m_pbSave, 0, 2);
     wTopLayout->addWidget(m_pbClone, 1, 0);
     wTopLayout->addWidget(m_pbDelete, 1, 1);
 
@@ -72,10 +74,6 @@ NodeItemWidget::NodeItemWidget(QWidget* parent, const QString& key)
     setLayout(layout);
 
     m_leName->setText(key);
-    m_cbVisible->setText("Visible");
-    m_pbSelect->setText("Select");
-    m_pbClone->setText("Clone");
-    m_pbDelete->setText("Delete");
     m_cbVisible->setChecked(true);
     m_leNodePosition->setText("0,0");
 
@@ -84,6 +82,9 @@ NodeItemWidget::NodeItemWidget(QWidget* parent, const QString& key)
     });
     connect(m_pbSelect, &QPushButton::clicked, [this]() {
         emit selected(m_key);
+    });
+    connect(m_pbSave, &QPushButton::clicked, [this]() {
+        emit saveRequested(m_key);
     });
     connect(m_pbDelete, &QPushButton::clicked, [this]() {
         emit deleteRequested(m_key);
@@ -120,7 +121,7 @@ void NodeItemWidget::mousePressEvent(QMouseEvent* event)
 
 void NodeItemWidget::select()
 {
-    setStyleSheet("background: rgba(0,1,0,0.2);");
+    setStyleSheet("background: rgba(0,0,0,0.2);");
     m_isSelected = true;
 }
 

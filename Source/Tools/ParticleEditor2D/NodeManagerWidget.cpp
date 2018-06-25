@@ -33,7 +33,8 @@ namespace Urho3D
     
 NodeManagerWidget::NodeManagerWidget(QWidget* parent) :
     QWidget(parent)
-  , m_pbToggleGrid(new QPushButton("grid"))
+  , m_pbToggleGrid(new QPushButton(tr("grid"), this))
+  , m_pbSaveAll(new QPushButton(tr("save all"), this))
   , m_horizontalSpacer(new QSpacerItem(20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum))
 {
     setLayout(new QHBoxLayout);
@@ -42,7 +43,13 @@ NodeManagerWidget::NodeManagerWidget(QWidget* parent) :
     layout()->setContentsMargins(0,0,0,0);
     layout()->setSpacing(0);
 
-    layout()->addWidget(m_pbToggleGrid);
+    QWidget* vBar = new QWidget(this);
+    vBar->setLayout(new QVBoxLayout);
+    vBar->layout()->addWidget(m_pbToggleGrid);
+    vBar->layout()->addWidget(m_pbSaveAll);
+    vBar->layout()->addItem(new QSpacerItem(10, 10, QSizePolicy::Minimum, QSizePolicy::Expanding));
+
+    layout()->addWidget(vBar);
     layout()->addItem(m_horizontalSpacer);
 
     connect(m_pbToggleGrid, &QPushButton::clicked, this, [this]() {
@@ -66,6 +73,10 @@ NodeManagerWidget::NodeManagerWidget(QWidget* parent) :
                 y += step;
             }
         }
+    });
+
+    connect(m_pbSaveAll, &QPushButton::clicked, this, [this]{
+        emit saveAllRequested();
     });
 }
 
@@ -91,6 +102,9 @@ void NodeManagerWidget::add(NodeItemWidget* item)
                 w->deselect();
             }
         }
+    });
+    connect(item, &NodeItemWidget::saveRequested, this, [this](QString key){
+        emit saveRequested(key);
     });
     connect(item, &NodeItemWidget::deleteRequested, this, [this](QString key){
         assert(remove(key));

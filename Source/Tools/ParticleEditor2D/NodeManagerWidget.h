@@ -51,9 +51,12 @@ signals:
     void nodePositionChanged(const QString&, int, int);
     void acceptKeyChangeRequest(QString, QString);
     void selected(const QString&);
+    void saveAllRequested();
+    void saveRequested(const QString&);
 
 private:
     QPushButton* m_pbToggleGrid = nullptr;
+    QPushButton* m_pbSaveAll = nullptr;
     QSpacerItem* m_horizontalSpacer = nullptr;
     std::map<QString, NodeItemWidget*> m_widgets;
 

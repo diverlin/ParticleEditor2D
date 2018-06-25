@@ -90,6 +90,7 @@ public:
 
     bool Open(QString fileName);
     void Save(const String& fileName);
+    void SaveAll();
     bool changeKey(const String& fromKey, const String& toKey);
     bool select(const String& key);
 

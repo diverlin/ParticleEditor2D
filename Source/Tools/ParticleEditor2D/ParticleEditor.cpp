@@ -231,6 +231,14 @@ bool ParticleEditor::Open(QString filepath)
     return true;
 }
 
+
+void ParticleEditor::SaveALl()
+{
+    for (auto it: particleNodes_) {
+        Save(it.first);
+    }
+}
+
 void ParticleEditor::Save(const String& fileName)
 {
     ParticleEffect2D* particleEffect = GetEffect();
@@ -244,8 +252,6 @@ void ParticleEditor::Save(const String& fileName)
     }
 
     particleEffect->Save(file);
-
-//    fileName_ = fileName;
 }
 
 Camera* ParticleEditor::GetCamera() const
