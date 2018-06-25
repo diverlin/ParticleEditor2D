@@ -212,14 +212,7 @@ bool ParticleEditor::Open(QString filepath)
 }
 
 
-void ParticleEditor::SaveAll()
-{
-    for (auto it: particleNodes_) {
-        Save(it.first);
-    }
-}
-
-void ParticleEditor::Save(const String& fileName)
+bool ParticleEditor::Save(const String& fileName)
 {
     QString abs_filepath = absolutePathFrom(fileName.CString());
     QString rel_filepath = relativePathFrom(fileName.CString());
@@ -228,15 +221,15 @@ void ParticleEditor::Save(const String& fileName)
 
     ParticleEffect2D* particleEffect = GetEffect( key );
     if (!particleEffect)
-        return;
+        return false;
 
     File file(context_);
     if (!file.Open(filepath, FILE_WRITE)) {
         showInfoMessageBox(QString("Open file with write abilities failed %1").arg(filepath.CString()));
-        return;
+        return false;
     }
 
-    particleEffect->Save(file);
+    return particleEffect->Save(file);
 }
 
 Camera* ParticleEditor::GetCamera() const

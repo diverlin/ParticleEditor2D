@@ -89,8 +89,7 @@ public:
     bool SetParticleNodePosition(const String& key, int x, int y);
 
     bool Open(QString fileName);
-    void Save(const String& fileName);
-    void SaveAll();
+    bool Save(const String& fileName);
     bool changeKey(const String& fromKey, const String& toKey);
     bool select(const String& key);
 

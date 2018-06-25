@@ -130,6 +130,30 @@ void NodeManagerWidget::add(NodeItemWidget* item)
     layout()->addItem(m_horizontalSpacer);
 }
 
+QList<QString> NodeManagerWidget::getDirtyKeys() const {
+    QList<QString> keys;
+    for(auto it: m_widgets) {
+        if (it.second->isDirty()) {
+            keys << it.first;
+        }
+    }
+    return keys;
+}
+
+void NodeManagerWidget::markDirty(QString key) {
+    NodeItemWidget* widget = itemWidget(key);
+    if (widget) {
+        widget->markDirty();
+    }
+}
+
+void NodeManagerWidget::unmarkDirty(QString key) {
+    NodeItemWidget* widget = itemWidget(key);
+    if (widget) {
+        widget->unmarkDirty();
+    }
+}
+
 NodeItemWidget* NodeManagerWidget::itemWidget(const QString& key) const {
     auto it = m_widgets.find(key);
     if (it != m_widgets.end()) {

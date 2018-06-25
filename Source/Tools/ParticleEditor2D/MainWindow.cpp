@@ -51,8 +51,8 @@ namespace Urho3D
 MainWindow::MainWindow(Context* context) :
     QMainWindow(0, 0),
     ParticleEffectEditor(context),
-    emitterAttributeEditor_(0),
-    particleAttributeEditor_(0)
+    emitterAttributeEditor_(nullptr),
+    particleAttributeEditor_(nullptr)
 {
     setWindowIcon(QIcon(":/Images/Icon.png"));
 
@@ -202,13 +202,23 @@ void MainWindow::CreateDockWidgets()
         HandleUpdateWidget();
     });
     connect(nodeManagerWidget_, &NodeManagerWidget::saveAllRequested, this, [this]() {
-        ParticleEditor::Get()->SaveAll();
+        QList<QString> keys = nodeManagerWidget_->getDirtyKeys();
+        for (QString key: keys) {
+            if (ParticleEditor::Get()->Save(String(key.toStdString().c_str()))) {
+                nodeManagerWidget_->unmarkDirty(key);
+            }
+        }
     });
     connect(nodeManagerWidget_, &NodeManagerWidget::saveRequested, this, [this](const QString& key) {
-        ParticleEditor::Get()->Save(String(key.toStdString().c_str()));
+        if (ParticleEditor::Get()->Save(String(key.toStdString().c_str()))) {
+            nodeManagerWidget_->unmarkDirty(key);
+        }
     });
 
     emitterAttributeEditor_ = new EmitterAttributeEditor(context_);
+    connect(emitterAttributeEditor_, &EmitterAttributeEditor::changed, this, [this](QString key) {
+        nodeManagerWidget_->markDirty(key);
+    });
 
     QDockWidget* eaDockWidget = new QDockWidget(tr("Emitter Attributes"));
     addDockWidget(Qt::LeftDockWidgetArea, eaDockWidget);
@@ -221,6 +231,9 @@ void MainWindow::CreateDockWidgets()
     eaToggleViewAction->setShortcut(QKeySequence::fromString("Ctrl+E"));
 
     particleAttributeEditor_ = new ParticleAttributeEditor(context_);
+    connect(particleAttributeEditor_, &ParticleAttributeEditor::changed, this, [this](QString key) {
+        nodeManagerWidget_->markDirty(key);
+    });
 
     QDockWidget* paDockWidget = new QDockWidget(tr("Particle Attributes"));
     addDockWidget(Qt::RightDockWidgetArea, paDockWidget);

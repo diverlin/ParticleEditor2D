@@ -81,6 +81,8 @@ void EmitterAttributeEditor::HandleMaxParticlesEditorValueChanged(int value)
         return;
 
     maxParticlesChanged_ = true;
+
+    emit changed( GetSelectedKey().CString() );
 }
 
 void EmitterAttributeEditor::HandleDurationEditorValueChanged(float value)
@@ -88,7 +90,11 @@ void EmitterAttributeEditor::HandleDurationEditorValueChanged(float value)
     if (updatingWidget_)
         return;
 
-    GetEffect( GetSelectedKey() )->SetDuration(value);
+    if (ParticleEffect2D* effect = GetEffect( GetSelectedKey() )) {
+        effect->SetDuration(value);
+    }
+
+    emit changed( GetSelectedKey().CString() );
 }
 
 void EmitterAttributeEditor::HandleTexturePushButtonClicked()
@@ -110,8 +116,14 @@ void EmitterAttributeEditor::HandleTexturePushButtonClicked()
 
     textureEditor_->setText(fileName);
 
-    GetEffect( GetSelectedKey() )->SetSprite(sprite);
-    GetEmitter( GetSelectedKey() )->SetSprite(sprite);
+    if (ParticleEffect2D* effect = GetEffect( GetSelectedKey() )) {
+        effect->SetSprite(sprite);
+    }
+    if (ParticleEmitter2D* emitter =  GetEmitter( GetSelectedKey() )) {
+        emitter->SetSprite(sprite);
+    }
+
+    emit changed( GetSelectedKey().CString() );
 }
 
 void EmitterAttributeEditor::HandleBlendModeEditorChanged(int index)
@@ -119,8 +131,14 @@ void EmitterAttributeEditor::HandleBlendModeEditorChanged(int index)
     if (updatingWidget_)
         return;
 
-    GetEffect( GetSelectedKey() )->SetBlendMode((BlendMode)index);
-    GetEmitter( GetSelectedKey() )->SetBlendMode((BlendMode)index);
+    if (ParticleEffect2D* effect = GetEffect( GetSelectedKey() )) {
+        effect->SetBlendMode((BlendMode)index);
+    }
+    if (ParticleEmitter2D* emitter =  GetEmitter( GetSelectedKey() )) {
+        emitter->SetBlendMode((BlendMode)index);
+    }
+
+    emit changed( GetSelectedKey().CString() );
 }
 
 void EmitterAttributeEditor::HandleEmitterTypeEditorChanged(int index)
@@ -132,7 +150,11 @@ void EmitterAttributeEditor::HandleEmitterTypeEditorChanged(int index)
     if (updatingWidget_)
         return;
 
-    GetEffect( GetSelectedKey() )->SetEmitterType(emitterType);
+    if (ParticleEffect2D* effect = GetEffect( GetSelectedKey() )) {
+        effect->SetEmitterType(emitterType);
+    }
+
+    emit changed( GetSelectedKey().CString() );
 }
 
 void EmitterAttributeEditor::HandleSourcePositionVarianceEditorValueChanged(const Vector2& value)
@@ -140,7 +162,11 @@ void EmitterAttributeEditor::HandleSourcePositionVarianceEditorValueChanged(cons
     if (updatingWidget_)
         return;
 
-    GetEffect( GetSelectedKey() )->SetSourcePositionVariance(value);
+    if (ParticleEffect2D* effect = GetEffect( GetSelectedKey() )) {
+        effect->SetSourcePositionVariance(value);
+    }
+
+    emit changed( GetSelectedKey().CString() );
 }
 
 void EmitterAttributeEditor::HandleGravityEditorValueChanged(const Vector2& value)
@@ -148,7 +174,11 @@ void EmitterAttributeEditor::HandleGravityEditorValueChanged(const Vector2& valu
     if (updatingWidget_)
         return;
 
-    GetEffect( GetSelectedKey() )->SetGravity(value);
+    if (ParticleEffect2D* effect = GetEffect( GetSelectedKey() )) {
+        effect->SetGravity(value);
+    }
+
+    emit changed( GetSelectedKey().CString() );
 }
 
 void EmitterAttributeEditor::HandleValueVarianceEditorValueChanged(float average, float variance)
@@ -158,6 +188,9 @@ void EmitterAttributeEditor::HandleValueVarianceEditorValueChanged(float average
 
     QObject* s = sender();
     ParticleEffect2D* effect = GetEffect( GetSelectedKey() );
+    if (!effect) {
+        return;
+    }
 
     if (s == speedEditor_)
     {
@@ -196,6 +229,8 @@ void EmitterAttributeEditor::HandleValueVarianceEditorValueChanged(float average
         effect->SetRotatePerSecond(rotatePerSecondEditor_->value());
         effect->SetRotatePerSecondVariance(rotatePerSecondEditor_->variance());
     }
+
+    emit changed( GetSelectedKey().CString() );
 }
 
 void EmitterAttributeEditor::HandleUpdateWidget()
@@ -368,8 +403,12 @@ void EmitterAttributeEditor::HandlePostUpdate(StringHash eventType, VariantMap& 
 
     maxParticlesChanged_ = false;
 
-    GetEffect( GetSelectedKey() )->SetMaxParticles(maxParticlesEditor_->value());
-    GetEmitter( GetSelectedKey() )->SetMaxParticles(maxParticlesEditor_->value());
+    if (ParticleEffect2D* effect = GetEffect( GetSelectedKey() )) {
+        effect->SetMaxParticles(maxParticlesEditor_->value());
+    }
+    if (ParticleEmitter2D* emitter = GetEmitter( GetSelectedKey() )) {
+        emitter->SetMaxParticles(maxParticlesEditor_->value());
+    }
 }
 
-}
+} // namespace Urho3D

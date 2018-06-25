@@ -119,18 +119,6 @@ void NodeItemWidget::mousePressEvent(QMouseEvent* event)
     QWidget::mousePressEvent(event);
 }
 
-void NodeItemWidget::select()
-{
-    setStyleSheet("background: rgba(0,0,0,0.2);");
-    m_isSelected = true;
-}
-
-void NodeItemWidget::deselect()
-{
-    setStyleSheet("");
-    m_isSelected = false;
-}
-
 void NodeItemWidget::setNodePosition(int x, int y)
 {
     QString text = QString("%1,%2").arg(QString::number(x)).arg(QString::number(y));
@@ -153,5 +141,22 @@ void NodeItemWidget::acceptNewKeyCandidate()
     });
 }
 
+void NodeItemWidget::updateBackground() {
+    QString css("");
+    if (m_isSelected) {
+        if (m_isDirty) {
+            css = "background: rgba(255,0,0,0.2);";
+        } else {
+            css = "background: rgba(0,0,0,0.2);";
+        }
+    } else {
+        if (m_isDirty) {
+            css = "background: rgba(255,0,0,0.1);";
+        } else {
+            css = "";
+        }
+    }
+    setStyleSheet(css);
+}
 
 } // namespace Urho3D

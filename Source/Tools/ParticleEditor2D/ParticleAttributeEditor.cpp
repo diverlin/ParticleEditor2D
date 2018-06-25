@@ -92,6 +92,8 @@ void ParticleAttributeEditor::HanldeValueVarianceEditorValueChanged(float averag
         effect->SetRotationEnd(average);
         effect->SetRotationEndVariance(variance);
     }
+
+    emit changed( GetSelectedKey().CString() );
 }
 
 
@@ -132,12 +134,16 @@ void ParticleAttributeEditor::HandleStartColorEditorValueChanged(const Color& av
 {
     if (updatingWidget_)
         return;
+
     ParticleEffect2D* effect = GetEffect( GetSelectedKey() );
     if (!effect) {
         return;
     }
+
     effect->SetStartColor(average);
     effect->SetStartColorVariance(variance);
+
+    emit changed( GetSelectedKey().CString() );
 }
 
 void ParticleAttributeEditor::HandleFinishColorEditorValueChanged(const Color& average, const Color& variance)
@@ -149,7 +155,11 @@ void ParticleAttributeEditor::HandleFinishColorEditorValueChanged(const Color& a
     if (!effect) {
         return;
     }
+
     effect->SetFinishColor(average);
     effect->SetFinishColorVariance(variance);
+
+    emit changed( GetSelectedKey().CString() );
 }
-}
+
+} // namespace Urho3D

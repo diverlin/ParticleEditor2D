@@ -41,6 +41,10 @@ public:
 
     NodeItemWidget* itemWidget(const QString&) const;
 
+    QList<QString> getDirtyKeys() const;
+
+    void unmarkDirty(QString key);
+    void markDirty(QString key);
     void add(NodeItemWidget*);
     bool remove(const QString&);
     bool changeKey(const QString&, const QString&);
