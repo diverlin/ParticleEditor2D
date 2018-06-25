@@ -102,7 +102,11 @@ void MainWindow::CreateActions()
 
     exitAction_ = new QAction(tr("Exit"), this);
     exitAction_->setShortcut(QKeySequence::fromString("Alt+F4"));
-    connect(exitAction_, SIGNAL(triggered(bool)), this, SLOT(close()));
+    connect(exitAction_, &QAction::triggered, this, [this](bool){
+        if (checkClosePermition()) {
+            close();
+        }
+    });
 
     zoomInAction_ = new QAction(QIcon(":/Images/ZoomIn.png"), tr("Zoom In"), this);
     zoomInAction_->setShortcut(QKeySequence::fromString("Ctrl++"));
@@ -119,6 +123,24 @@ void MainWindow::CreateActions()
     backgroundAction_ = new QAction(tr("Background"), this);
     backgroundAction_->setShortcut(QKeySequence::fromString("Ctrl+B"));
     connect(backgroundAction_, SIGNAL(triggered(bool)), this, SLOT(HandleBackgroundAction()));
+}
+
+bool MainWindow::checkClosePermition() const {
+    if (nodeManagerWidget_->hasUnsaved()) {
+        if (QMessageBox::Ok != showQuestionMessageBox("There are some unsaved configurations. Still want to exit and lost data?")) {
+            return false;
+        }
+    }
+    return true;
+}
+
+void MainWindow::closeEvent(QCloseEvent* event) {
+
+    if (!checkClosePermition()) {
+        event->ignore();
+    } else {
+        event->accept();
+    }
 }
 
 static QAction* CreateAction(QActionGroup* group, const QString& iconFileName, const QString& text, bool checked, const QString& shortcut = "")
@@ -310,13 +332,22 @@ void MainWindow::HandleBackgroundAction()
     renderer->GetDefaultZone()->SetFogColor(newColor);
 }
 
-void showInfoMessageBox(const QString& msg)
+int showInfoMessageBox(const QString& msg)
 {
     QMessageBox msgBox;
     msgBox.setText(msg);
     msgBox.setStandardButtons(QMessageBox::Ok);
     msgBox.setDefaultButton(QMessageBox::Ok);
-    msgBox.exec();
+    return msgBox.exec();
+}
+
+int showQuestionMessageBox(const QString& msg)
+{
+    QMessageBox msgBox;
+    msgBox.setText(msg);
+    msgBox.setStandardButtons(QMessageBox::Ok|QMessageBox::Cancel);
+    msgBox.setDefaultButton(QMessageBox::Cancel);
+    return msgBox.exec();
 }
 
 } // namespace Urho3D

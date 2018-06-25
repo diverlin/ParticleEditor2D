@@ -130,6 +130,10 @@ void NodeManagerWidget::add(NodeItemWidget* item)
     layout()->addItem(m_horizontalSpacer);
 }
 
+bool NodeManagerWidget::hasUnsaved() const {
+    return (getDirtyKeys().size() !=0);
+}
+
 QList<QString> NodeManagerWidget::getDirtyKeys() const {
     QList<QString> keys;
     for(auto it: m_widgets) {

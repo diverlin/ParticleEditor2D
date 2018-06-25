@@ -41,6 +41,7 @@ public:
 
     NodeItemWidget* itemWidget(const QString&) const;
 
+    bool hasUnsaved() const;
     QList<QString> getDirtyKeys() const;
 
     void unmarkDirty(QString key);

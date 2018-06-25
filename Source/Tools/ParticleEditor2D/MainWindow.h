@@ -113,8 +113,14 @@ private:
     ParticleAttributeEditor* particleAttributeEditor_;
 
     NodeManagerWidget* nodeManagerWidget_ = nullptr;
+
+    bool checkClosePermition() const;
+
+protected:
+    void closeEvent(QCloseEvent*) override final;
 };
 
-void showInfoMessageBox(const QString&);
+int showInfoMessageBox(const QString&);
+int showQuestionMessageBox(const QString&);
 
 } // namespace Urho3D
