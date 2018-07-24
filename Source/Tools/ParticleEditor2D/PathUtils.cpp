@@ -25,23 +25,23 @@
 #include <QApplication>
 #include <QFile>
 
-QString absolutePathFrom(QString path)
-{
-    QString workdir = qApp->applicationDirPath();
-    if(!path.startsWith(workdir)) {
-        path = workdir + "/" + path;
-    }
-    return path;
-}
+//QString absolutePathFrom(QString path)
+//{
+//    QString workdir = qApp->applicationDirPath();
+//    if(!path.startsWith(workdir)) {
+//        path = workdir + "/" + path;
+//    }
+//    return path;
+//}
 
-QString relativePathFrom(QString path)
-{
-    path.replace(qApp->applicationDirPath(), "");
-    if (path.startsWith("/")) {
-        path.remove(0, 1);
-    }
-    return path;
-}
+//QString relativePathFrom(QString path)
+//{
+//    path.replace(qApp->applicationDirPath(), "");
+//    if (path.startsWith("/")) {
+//        path.remove(0, 1);
+//    }
+//    return path;
+//}
 
 QString freeBackupPath(QString path, QString ext) {
     if (QFile(path).exists()) {

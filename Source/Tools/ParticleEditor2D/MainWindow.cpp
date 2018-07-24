@@ -45,6 +45,10 @@
 #include <QResizeEvent>
 #include <QMessageBox>
 
+namespace {
+const QString LAST_PATH("lastPath");
+const QString LAST_PS("lastPs");
+}
 
 namespace Urho3D
 {
@@ -104,7 +108,7 @@ void MainWindow::CreateActions()
     exitAction_ = new QAction(tr("Exit"), this);
     exitAction_->setShortcut(QKeySequence::fromString("Alt+F4"));
     connect(exitAction_, &QAction::triggered, this, [this](bool){
-        if (checkClosePermition()) {
+        if (CheckClosePermition()) {
             close();
         }
     });
@@ -126,7 +130,7 @@ void MainWindow::CreateActions()
     connect(backgroundAction_, SIGNAL(triggered(bool)), this, SLOT(HandleBackgroundAction()));
 }
 
-bool MainWindow::checkClosePermition() const {
+bool MainWindow::CheckClosePermition() const {
     if (nodeManagerWidget_->hasUnsaved()) {
         if (QMessageBox::Ok != showQuestionMessageBox("There are some unsaved configurations. Still want to exit and lost data?")) {
             return false;
@@ -137,7 +141,7 @@ bool MainWindow::checkClosePermition() const {
 
 void MainWindow::closeEvent(QCloseEvent* event) {
 
-    if (!checkClosePermition()) {
+    if (!CheckClosePermition()) {
         event->ignore();
     } else {
         event->accept();
@@ -211,6 +215,7 @@ void MainWindow::CreateDockWidgets()
     });
     connect(nodeManagerWidget_, &NodeManagerWidget::deleteRequested, this, [this](QString key) {
         assert(ParticleEditor::Get()->RemoveParticleNode(String(key.toStdString().c_str())));
+        SaveOpenedPS();
     });
     connect(nodeManagerWidget_, &NodeManagerWidget::nodePositionChanged, this, [this](const QString& key, int x, int y) {
         assert(ParticleEditor::Get()->SetParticleNodePosition(String(key.toStdString().c_str()), x, y));
@@ -284,9 +289,9 @@ void MainWindow::HandleNewAction()
 void MainWindow::HandleOpenAction()
 {
     QSettings settings;
-    QString path = settings.value("lastPath", "").toString();
+    QString path = settings.value(LAST_PATH, "").toString();
     if (!QFileInfo(path).exists()) {
-        path = "./Data/Urho2D";
+        path = QApplication::applicationDirPath() +"/Data/Urho2D";
     }
 
     QString filepath = QFileDialog::getOpenFileName(0, tr("Open particle"), path, "*.pex");
@@ -294,8 +299,32 @@ void MainWindow::HandleOpenAction()
         return;
 
     path = QFileInfo(filepath).absolutePath();
-    settings.setValue("lastPath", path);
-    ParticleEditor::Get()->Open(filepath.toLatin1().data());
+    settings.setValue(LAST_PATH, path);
+
+    bool result = ParticleEditor::Get()->Open(filepath.toLatin1().data());
+    if (result) {
+        SaveOpenedPS();
+    }
+}
+
+void MainWindow::SaveOpenedPS() const
+{
+    QSettings settings;
+    QList<QString> keys = ParticleEditor::Get()->GetKeys();
+    QString data = keys.join(";");
+    settings.setValue(LAST_PS, data);
+}
+
+void MainWindow::OpenPrevioslyOpenedPS() const
+{
+    QSettings settings;
+    QString data = settings.value(LAST_PS, "").toString();
+    QList<QString> keys = data.split(";");
+    for (QString key: keys) {
+        if (QFileInfo(key).exists()) {
+            ParticleEditor::Get()->Open(key);
+        }
+    }
 }
 
 void MainWindow::HandleSaveAction()

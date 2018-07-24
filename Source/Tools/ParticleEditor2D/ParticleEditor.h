@@ -101,6 +101,8 @@ public:
     /// Return emitter.
     ParticleEmitter2D* GetEmitter(const String&) const;
 
+    QList<QString> GetKeys() const;
+
     /// Return editor pointer.
     static ParticleEditor* Get();
 
