@@ -33,6 +33,7 @@
 #include <Urho3D/Graphics/Renderer.h>
 #include <Urho3D/Graphics/Zone.h>
 
+#include <QSettings>
 #include <QAction>
 #include <QColorDialog>
 #include <QDockWidget>
@@ -282,11 +283,19 @@ void MainWindow::HandleNewAction()
 
 void MainWindow::HandleOpenAction()
 {
-    QString fileName = QFileDialog::getOpenFileName(0, tr("Open particle"), "./Data/Urho2D/", "*.pex");
-    if (fileName.isEmpty())
+    QSettings settings;
+    QString path = settings.value("lastPath", "").toString();
+    if (!QFileInfo(path).exists()) {
+        path = "./Data/Urho2D";
+    }
+
+    QString filepath = QFileDialog::getOpenFileName(0, tr("Open particle"), path, "*.pex");
+    if (filepath.isEmpty())
         return;
 
-    ParticleEditor::Get()->Open(fileName.toLatin1().data());
+    path = QFileInfo(filepath).absolutePath();
+    settings.setValue("lastPath", path);
+    ParticleEditor::Get()->Open(filepath.toLatin1().data());
 }
 
 void MainWindow::HandleSaveAction()
