@@ -128,6 +128,10 @@ void NodeManagerWidget::add(NodeItemWidget* item)
     layout()->removeItem(m_horizontalSpacer);
     layout()->addWidget(item);
     layout()->addItem(m_horizontalSpacer);
+
+    if (m_widgets.size() == 1) {
+        item->emitSelected();
+    }
 }
 
 bool NodeManagerWidget::hasUnsaved() const {

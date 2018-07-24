@@ -108,9 +108,10 @@ int ParticleEditor::Run()
 void ParticleEditor::CreateParticles()
 {
     QList<QString> files;
-    files << "Data/Urho2D/fire.pex"
-          << "Data/Urho2D/sun2.pex"
-          << "Data/Urho2D/greenspiral.pex";
+//    files << "Data/Urho2D/fire.pex"
+//          << "Data/Urho2D/sun2.pex"
+//          << "Data/Urho2D/greenspiral.pex";
+    files << "Data/Urho2D/jet.pex";
     for(const QString& file: files) {
         Open(file.toStdString().c_str());
     }
