@@ -22,7 +22,7 @@
 
 #include <QString>
 
-QString absolutePathFrom(QString path);
-QString relativePathFrom(QString path);
+//QString absolutePathFrom(QString path);
+//QString relativePathFrom(QString path);
 QString freeBackupPath(QString path, QString ext);
 

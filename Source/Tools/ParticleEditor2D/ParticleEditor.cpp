@@ -66,6 +66,8 @@ ParticleEditor::ParticleEditor(int argc, char** argv, Context* context) :
     SubscribeToEvent(E_KEYDOWN, URHO3D_HANDLER(ParticleEditor, HandleKeyDown));
     SubscribeToEvent(E_MOUSEWHEEL, URHO3D_HANDLER(ParticleEditor, HandleMouseWheel));
     SubscribeToEvent(E_RENDERUPDATE, URHO3D_HANDLER(ParticleEditor, HandleRenderUpdate));
+
+    QApplication::setApplicationName("Urho2DParticleEditor");
 }
 
 ParticleEditor::~ParticleEditor()
@@ -97,6 +99,8 @@ int ParticleEditor::Run()
     connect(&timer, SIGNAL(timeout()), this, SLOT(OnTimeout()));
     timer.start(16);
 
+    mainWindow_->OpenPrevioslyOpenedPS();
+
     return QApplication::exec();
 }
 
@@ -108,9 +112,6 @@ int ParticleEditor::Run()
 void ParticleEditor::CreateParticles()
 {
     QList<QString> files;
-    files << "Data/Urho2D/fire.pex"
-          << "Data/Urho2D/sun2.pex"
-          << "Data/Urho2D/greenspiral.pex";
     for(const QString& file: files) {
         Open(file.toStdString().c_str());
     }
@@ -191,20 +192,27 @@ bool ParticleEditor::isFileAlreadyOpened(const QString& key) const
     return (it != particleNodes_.end());
 }
 
+QList<QString> ParticleEditor::GetKeys() const
+{
+    QList<QString> keys;
+    for(auto it: particleNodes_) {
+        keys<<it.first.CString();
+    }
+    return keys;
+}
+
 bool ParticleEditor::Open(QString filepath)
 {
-    QString abs_filepath( absolutePathFrom(filepath) );
-    QString rel_filepath( relativePathFrom(filepath) );
-    if (!QFile(abs_filepath).exists()) {
-        showInfoMessageBox(QString("File %1 doesn't exist. Abort.").arg(abs_filepath));
+    if (!QFile(filepath).exists()) {
+        showInfoMessageBox(QString("File %1 doesn't exist. Abort.").arg(filepath));
         return false;
     }
-    if (isFileAlreadyOpened(rel_filepath)) {
-        showInfoMessageBox(QString("The %1 already opened. Abort").arg(rel_filepath));
+    if (isFileAlreadyOpened(filepath)) {
+        showInfoMessageBox(QString("The %1 already opened. Abort").arg(filepath));
         return false;
     }
-    if (!AddParticleNode(rel_filepath.toStdString().c_str())) {
-        showInfoMessageBox(QString("Fail to open %1 particle effect. Abort").arg(rel_filepath));
+    if (!AddParticleNode(filepath.toStdString().c_str())) {
+        showInfoMessageBox(QString("Fail to open %1 particle effect. Abort").arg(filepath));
         return false;
     }
     mainWindow_->UpdateWidget();
@@ -212,14 +220,9 @@ bool ParticleEditor::Open(QString filepath)
 }
 
 
-bool ParticleEditor::Save(const String& fileName)
+bool ParticleEditor::Save(const String& filepath)
 {
-    QString abs_filepath = absolutePathFrom(fileName.CString());
-    QString rel_filepath = relativePathFrom(fileName.CString());
-    String key(rel_filepath.toStdString().c_str());
-    String filepath(abs_filepath.toStdString().c_str());
-
-    ParticleEffect2D* particleEffect = GetEffect( key );
+    ParticleEffect2D* particleEffect = GetEffect(filepath);
     if (!particleEffect)
         return false;
 
@@ -401,8 +404,8 @@ bool ParticleEditor::changeKey(const String& fromKey, const String& toKey)
 
 bool ParticleEditor::renameFile(const QString& fromKey, const QString& toKey) const
 {
-    QString absPathFrom( absolutePathFrom(fromKey) );
-    QString absPathTo( absolutePathFrom(toKey) );
+    QString absPathFrom( fromKey );
+    QString absPathTo( toKey );
 
     if (QFile(absPathTo).exists()) {
         QString msg("file %1 already exists, will be backup as %2");

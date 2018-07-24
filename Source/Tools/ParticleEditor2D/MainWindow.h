@@ -52,6 +52,7 @@ public:
     
     /// Create widgets.
     void CreateWidgets();
+    void OpenPrevioslyOpenedPS() const;
 
 private:
     /// Handle update widget.
@@ -112,9 +113,11 @@ private:
     /// Inspector window.
     ParticleAttributeEditor* particleAttributeEditor_;
 
+    void SaveOpenedPS() const;
+
     NodeManagerWidget* nodeManagerWidget_ = nullptr;
 
-    bool checkClosePermition() const;
+    bool CheckClosePermition() const;
 
 protected:
     void closeEvent(QCloseEvent*) override final;

@@ -53,6 +53,8 @@ public:
     void select() { m_isSelected = true; updateBackground(); }
     void deselect() { m_isSelected = false; updateBackground(); }
 
+    void emitSelected() { emit selected(m_key); }
+
 signals:
     void selected(const QString&);
     void visibleChanged(const QString&, bool);
