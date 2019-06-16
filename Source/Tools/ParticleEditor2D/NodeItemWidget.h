@@ -23,6 +23,7 @@
 #pragma once
 
 #include <QWidget>
+#include <QTimer>
 
 class QPushButton;
 class QLineEdit;
@@ -57,6 +58,7 @@ public:
 
 signals:
     void selected(const QString&);
+    void restartEmiterRequest(const QString&);
     void visibleChanged(const QString&, bool);
     void deleteRequested(QString);
     void nodePositionChanged(const QString&, int x, int y);
@@ -69,8 +71,10 @@ protected:
 private:
     bool m_isDirty = false;
     bool m_isSelected = false;
+    QTimer m_resetEmiterTimer;
     QString m_key;
     QCheckBox* m_cbVisible = nullptr;
+    QLineEdit* m_lePeriod = nullptr;
     QPushButton* m_pbSelect = nullptr;
     QPushButton* m_pbSave = nullptr;
     QPushButton* m_pbClone = nullptr;

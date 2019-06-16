@@ -89,9 +89,7 @@ void NodeManagerWidget::add(NodeItemWidget* item)
     auto it = m_widgets.find(item->key());
     assert(it == m_widgets.end());
 
-    connect(item, &NodeItemWidget::visibleChanged, this, [this](const QString& key, bool visible){
-        emit visibleChanged(key, visible);
-    });
+    connect(item, &NodeItemWidget::visibleChanged, this, &NodeManagerWidget::visibleChanged);
     connect(item, &NodeItemWidget::selected, this, [this](const QString& key){
         emit selected(key);
         for (auto it: m_widgets) {
@@ -103,16 +101,13 @@ void NodeManagerWidget::add(NodeItemWidget* item)
             }
         }
     });
-    connect(item, &NodeItemWidget::saveRequested, this, [this](QString key){
-        emit saveRequested(key);
-    });
+    connect(item, &NodeItemWidget::restartEmiterRequest, this, &NodeManagerWidget::restartEmiterRequest);
+    connect(item, &NodeItemWidget::saveRequested, this, &NodeManagerWidget::saveRequested);
     connect(item, &NodeItemWidget::deleteRequested, this, [this](QString key){
         assert(remove(key));
         emit deleteRequested(key);
     });
-    connect(item, &NodeItemWidget::nodePositionChanged, this, [this](const QString& key, int x, int y){
-        emit nodePositionChanged(key, x, y);
-    });
+    connect(item, &NodeItemWidget::nodePositionChanged, this, &NodeManagerWidget::nodePositionChanged);
     connect(item, &NodeItemWidget::changeKeyRequest, this, [this](QString key, QString newKeyCandidate){
         NodeItemWidget* widget = itemWidget(key);
         if (isKeyUnique(newKeyCandidate)) {

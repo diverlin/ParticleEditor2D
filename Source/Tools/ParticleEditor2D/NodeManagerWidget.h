@@ -56,6 +56,7 @@ signals:
     void nodePositionChanged(const QString&, int, int);
     void acceptKeyChangeRequest(QString, QString);
     void selected(const QString&);
+    void restartEmiterRequest(const QString&);
     void saveAllRequested();
     void saveRequested(const QString&);
 

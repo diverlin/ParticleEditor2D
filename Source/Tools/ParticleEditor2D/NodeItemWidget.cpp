@@ -27,6 +27,7 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QTimer>
+#include <QIntValidator>
 #include <QDebug>
 
 namespace {
@@ -40,6 +41,7 @@ NodeItemWidget::NodeItemWidget(QWidget* parent, const QString& key)
     :
     QWidget(parent)
   , m_cbVisible(new QCheckBox(tr("Visible"), this))
+  , m_lePeriod(new QLineEdit(this))
   , m_pbSelect(new QPushButton(tr("Select"), this))
   , m_pbSave(new QPushButton(tr("Save"), this))
   , m_pbClone(new QPushButton(tr("Clone"), this))
@@ -48,6 +50,9 @@ NodeItemWidget::NodeItemWidget(QWidget* parent, const QString& key)
   , m_leNodePosition(new QLineEdit(this))
   , m_key(key)
 {
+    m_lePeriod->setText("-1");
+    m_lePeriod->setValidator(new QIntValidator(0, 10000, this));
+
     QVBoxLayout* layout = new QVBoxLayout;
     layout->setSizeConstraint(QLayout::SetMinimumSize);
     layout->setContentsMargins(0,0,0,0);
@@ -62,10 +67,11 @@ NodeItemWidget::NodeItemWidget(QWidget* parent, const QString& key)
     wTopLayout->setSpacing(0);
 
     wTopLayout->addWidget(m_cbVisible, 0, 0);
-    wTopLayout->addWidget(m_pbSelect, 0, 1);
-    wTopLayout->addWidget(m_pbSave, 0, 2);
-    wTopLayout->addWidget(m_pbClone, 1, 0);
-    wTopLayout->addWidget(m_pbDelete, 1, 1);
+    wTopLayout->addWidget(m_lePeriod, 0, 1);
+    wTopLayout->addWidget(m_pbSelect, 0, 2);
+    wTopLayout->addWidget(m_pbSave, 1, 0);
+    wTopLayout->addWidget(m_pbClone, 1, 1);
+    wTopLayout->addWidget(m_pbDelete, 1, 2);
 
     layout->addWidget(wTop);
     layout->addWidget(m_leName);
@@ -73,12 +79,25 @@ NodeItemWidget::NodeItemWidget(QWidget* parent, const QString& key)
 
     setLayout(layout);
 
+    connect(&m_resetEmiterTimer, &QTimer::timeout, this, [this](){
+        emit restartEmiterRequest(m_key);
+    });
+
     m_leName->setText(key);
     m_cbVisible->setChecked(true);
     m_leNodePosition->setText("0,0");
 
     connect(m_cbVisible, &QPushButton::toggled, [this](bool checked) {
         emit visibleChanged(m_key, checked);
+    });
+    connect(m_lePeriod, &QLineEdit::textEdited, [this](const QString& text) {
+        int period_ms = text.toInt();
+        if (period_ms > 0) {
+            m_resetEmiterTimer.setInterval(period_ms);
+            m_resetEmiterTimer.start();
+        } else {
+            m_resetEmiterTimer.stop();
+        }
     });
     connect(m_pbSelect, &QPushButton::clicked, [this]() {
         emit selected(m_key);

@@ -117,14 +117,31 @@ void ParticleEditor::CreateParticles()
     }
 }
 
+bool ParticleEditor::restartEmiter(const String& key)
+{
+    auto it = particleNodes_.find(key);
+    if (it != particleNodes_.end()) {
+        selectedParticleNode_ = it->second;
+
+        ParticleEmitter2D* emiter = selectedParticleNode_->GetComponent<ParticleEmitter2D>();
+        ParticleEffect2D* effect = emiter->GetEffect();
+        emiter->SetEffect(nullptr);
+        emiter->SetEffect(effect);
+
+        return true;
+    }
+    return false;
+}
+
 bool ParticleEditor::select(const String& key)
 {
     auto it = particleNodes_.find(key);
     if (it != particleNodes_.end()) {
         selectedKey_ = key;
         selectedParticleNode_ = it->second;
-        selectedEffectNode_->SetEnabled(true);
+        pointerNode_->SetEnabled(true);
         selectedAnimation_.start();
+
         return true;
     }
     return false;
@@ -134,7 +151,7 @@ bool ParticleEditor::SetVisible(const String& key, bool visible)
 {
     auto it = particleNodes_.find(key);
     if (it != particleNodes_.end()) {
-        SharedPtr<Node> node = it->second;
+        SharedPtr<Node>& node = it->second;
         node->SetEnabled(visible);
         return true;
     }
@@ -254,7 +271,7 @@ ParticleEmitter2D* ParticleEditor::GetEmitter(const String& key) const
 {
     auto it = particleNodes_.find(key);
     if (it != particleNodes_.end()) {
-        const SharedPtr<Node> node = it->second;
+        const SharedPtr<Node>& node = it->second;
         return node->GetComponent<ParticleEmitter2D>();
     }
     return nullptr;
@@ -273,12 +290,12 @@ void ParticleEditor::OnTimeout()
 
     // animation to point currently selected particle node
     if (selectedParticleNode_ && selectedAnimation_.isActive()) {
-        selectedEffectNode_->SetPosition(selectedParticleNode_->GetPosition());
+        pointerNode_->SetPosition(selectedParticleNode_->GetPosition());
         selectedAnimation_.update();
         float scale = selectedAnimation_.current();
-        selectedEffectNode_->SetScale(scale);
+        pointerNode_->SetScale(scale);
         if (scale < 0.05f) {
-            selectedEffectNode_->SetEnabled(false);
+            pointerNode_->SetEnabled(false);
         }
     }
 }
@@ -303,13 +320,13 @@ void ParticleEditor::CreateScene()
     renderer->SetViewport(0, viewport);
 
     // selection effect
-    selectedEffectNode_ = SharedPtr<Node>(scene_->CreateChild("Cursor"));
-    StaticSprite2D* sprite = selectedEffectNode_->CreateComponent<StaticSprite2D>();
+    pointerNode_ = SharedPtr<Node>(scene_->CreateChild("Cursor"));
+    StaticSprite2D* sprite = pointerNode_->CreateComponent<StaticSprite2D>();
     sprite->SetLayer(99);
     sprite->SetColor(Color(1.0f, 1.0f, 1.0f, 0.5f));
     ResourceCache* cache = GetSubsystem<ResourceCache>();
     sprite->SetSprite(cache->GetResource<Sprite2D>("Urho2D/cursor.png"));
-    selectedEffectNode_->SetEnabled(false);
+    pointerNode_->SetEnabled(false);
 }
 
 void ParticleEditor::CreateConsole()

@@ -91,6 +91,7 @@ public:
     bool Open(QString fileName);
     bool Save(const String& fileName);
     bool changeKey(const String& fromKey, const String& toKey);
+    bool restartEmiter(const String& key);
     bool select(const String& key);
 
     const String& GetFileName() const { return selectedKey_; }
@@ -146,7 +147,7 @@ private:
     ScaleDownAnimation selectedAnimation_;
     String selectedKey_;
     SharedPtr<Node> selectedParticleNode_;
-    SharedPtr<Node> selectedEffectNode_;
+    SharedPtr<Node> pointerNode_;
 
     void CreateParticles();
 

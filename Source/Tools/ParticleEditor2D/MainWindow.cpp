@@ -242,6 +242,9 @@ void MainWindow::CreateDockWidgets()
             nodeManagerWidget_->unmarkDirty(key);
         }
     });
+    connect(nodeManagerWidget_, &NodeManagerWidget::restartEmiterRequest, this, [this](const QString& key) {
+        assert(ParticleEditor::Get()->restartEmiter(String(key.toStdString().c_str())));
+    });
 
     emitterAttributeEditor_ = new EmitterAttributeEditor(context_);
     connect(emitterAttributeEditor_, &EmitterAttributeEditor::changed, this, [this](QString key) {
