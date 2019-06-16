@@ -26,6 +26,7 @@
 #include <QCheckBox>
 #include <QLineEdit>
 #include <QPushButton>
+#include <QLabel>
 #include <QTimer>
 #include <QIntValidator>
 #include <QDebug>
@@ -66,8 +67,18 @@ NodeItemWidget::NodeItemWidget(QWidget* parent, const QString& key)
     wTopLayout->setContentsMargins(0,0,0,0);
     wTopLayout->setSpacing(0);
 
+    QWidget* wPeriod = new QWidget;
+    QHBoxLayout* wPeriodLayout = new QHBoxLayout;
+    wPeriodLayout->setSizeConstraint(QLayout::SetMinimumSize);
+    wPeriod->setLayout(wPeriodLayout);
+    QLabel* lbPeriod1 = new QLabel("restart emiter in");
+    QLabel* lbPeriod2 = new QLabel("ms");
+    wPeriodLayout->addWidget(lbPeriod1);
+    wPeriodLayout->addWidget(m_lePeriod);
+    wPeriodLayout->addWidget(lbPeriod2);
+
     wTopLayout->addWidget(m_cbVisible, 0, 0);
-    wTopLayout->addWidget(m_lePeriod, 0, 1);
+    wTopLayout->addWidget(wPeriod, 0, 1);
     wTopLayout->addWidget(m_pbSelect, 0, 2);
     wTopLayout->addWidget(m_pbSave, 1, 0);
     wTopLayout->addWidget(m_pbClone, 1, 1);
